@@ -14,7 +14,205 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          property_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string
+          bathrooms: number | null
+          bedrooms: number | null
+          city: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          listing_url: string | null
+          lot_size: number | null
+          price: number
+          property_type: string | null
+          square_feet: number | null
+          state: string | null
+          updated_at: string | null
+          year_built: number | null
+          zip_code: string
+        }
+        Insert: {
+          address: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          listing_url?: string | null
+          lot_size?: number | null
+          price: number
+          property_type?: string | null
+          square_feet?: number | null
+          state?: string | null
+          updated_at?: string | null
+          year_built?: number | null
+          zip_code: string
+        }
+        Update: {
+          address?: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          listing_url?: string | null
+          lot_size?: number | null
+          price?: number
+          property_type?: string | null
+          square_feet?: number | null
+          state?: string | null
+          updated_at?: string | null
+          year_built?: number | null
+          zip_code?: string
+        }
+        Relationships: []
+      }
+      property_analysis: {
+        Row: {
+          created_at: string | null
+          estimated_arv: number | null
+          estimated_renovation_cost: number | null
+          estimated_roi: number | null
+          id: string
+          investment_grade: string | null
+          market_analysis: string | null
+          property_id: string | null
+          risk_assessment: string | null
+          suggested_offer_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          estimated_arv?: number | null
+          estimated_renovation_cost?: number | null
+          estimated_roi?: number | null
+          id?: string
+          investment_grade?: string | null
+          market_analysis?: string | null
+          property_id?: string | null
+          risk_assessment?: string | null
+          suggested_offer_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          estimated_arv?: number | null
+          estimated_renovation_cost?: number | null
+          estimated_roi?: number | null
+          id?: string
+          investment_grade?: string | null
+          market_analysis?: string | null
+          property_id?: string | null
+          risk_assessment?: string | null
+          suggested_offer_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_analysis_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_searches: {
+        Row: {
+          created_at: string | null
+          filters: Json | null
+          id: string
+          search_name: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          filters?: Json | null
+          id?: string
+          search_name: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          filters?: Json | null
+          id?: string
+          search_name?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_searches_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
