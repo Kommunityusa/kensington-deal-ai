@@ -45,27 +45,35 @@ export default function Dashboard() {
 
   const fetchProperties = async () => {
     setLoading(true);
-    let query = supabase
-      .from("properties")
-      .select("*, property_analysis(*)")
-      .order("created_at", { ascending: filters.sortBy === "oldest" });
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-properties', {
+        body: { 
+          filters: {
+            minPrice: filters.minPrice ? parseInt(filters.minPrice) : undefined,
+            maxPrice: filters.maxPrice ? parseInt(filters.maxPrice) : undefined,
+            propertyType: filters.propertyType
+          }
+        }
+      });
 
-    if (filters.minPrice) {
-      query = query.gte("price", parseInt(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      query = query.lte("price", parseInt(filters.maxPrice));
-    }
-    if (filters.propertyType !== "all") {
-      query = query.eq("property_type", filters.propertyType);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Error fetching properties:", error);
-    } else {
-      setProperties(data || []);
+      if (error) {
+        console.error("Error fetching properties:", error);
+        setProperties([]);
+      } else {
+        let propertiesList = data?.properties || [];
+        
+        // Apply sorting
+        if (filters.sortBy === "price-low") {
+          propertiesList.sort((a: any, b: any) => a.price - b.price);
+        } else if (filters.sortBy === "price-high") {
+          propertiesList.sort((a: any, b: any) => b.price - a.price);
+        }
+        
+        setProperties(propertiesList);
+      }
+    } catch (error) {
+      console.error("Error calling fetch-properties function:", error);
+      setProperties([]);
     }
     setLoading(false);
   };
