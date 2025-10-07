@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function Dashboard() {
 
   const fetchProperties = async () => {
     setLoading(true);
+    console.log('Starting to fetch properties with filters:', filters);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-properties', {
         body: { 
@@ -56,11 +58,15 @@ export default function Dashboard() {
         }
       });
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
         console.error("Error fetching properties:", error);
+        toast.error(`Failed to fetch properties: ${error.message}`);
         setProperties([]);
       } else {
         let propertiesList = data?.properties || [];
+        console.log(`Received ${propertiesList.length} properties`);
         
         // Apply sorting
         if (filters.sortBy === "price-low") {
@@ -70,9 +76,13 @@ export default function Dashboard() {
         }
         
         setProperties(propertiesList);
+        if (propertiesList.length > 0) {
+          toast.success(`Loaded ${propertiesList.length} properties`);
+        }
       }
     } catch (error) {
       console.error("Error calling fetch-properties function:", error);
+      toast.error("Failed to fetch properties. Please try again.");
       setProperties([]);
     }
     setLoading(false);
