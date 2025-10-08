@@ -66,23 +66,31 @@ serve(async (req) => {
     console.log('API Response:', JSON.stringify(data).substring(0, 200));
 
     // Transform API response to match our property structure
-    const properties = (data.data || data.listings || []).map((prop: any) => ({
-      id: prop.property_id || prop.zpid || Math.random().toString(),
-      address: prop.address?.line || prop.location?.address || 'Address not available',
-      city: prop.address?.city || 'Kensington',
-      state: prop.address?.state_code || 'PA',
-      zip_code: prop.address?.postal_code || '',
-      price: prop.list_price || prop.price || 0,
-      bedrooms: prop.description?.beds || prop.beds || 0,
-      bathrooms: prop.description?.baths || prop.baths || 0,
-      square_feet: prop.description?.sqft || prop.building_size?.size || 0,
-      property_type: prop.description?.type || prop.prop_type || 'Single Family',
-      image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || prop.thumbnail || '',
-      listing_url: prop.href || '',
-      description: prop.description?.text || '',
-      year_built: prop.description?.year_built || null,
-      lot_size: prop.description?.lot_sqft || null,
-    }));
+    const properties = (data.data || []).map((prop: any) => {
+      // Build address string from address object
+      const addressObj = prop.location?.address || prop.address || {};
+      const addressLine = addressObj.line || 
+        `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
+        'Address not available';
+      
+      return {
+        id: prop.property_id || prop.listing_id || Math.random().toString(),
+        address: addressLine,
+        city: addressObj.city || 'Kensington',
+        state: addressObj.state_code || addressObj.state || 'PA',
+        zip_code: addressObj.postal_code || '',
+        price: prop.list_price || prop.price || 0,
+        bedrooms: prop.description?.beds || prop.beds || 0,
+        bathrooms: prop.description?.baths_full || prop.description?.baths || prop.baths || 0,
+        square_feet: prop.description?.sqft || prop.description?.lot_sqft || 0,
+        property_type: prop.description?.type || prop.prop_type || 'Single Family',
+        image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
+        listing_url: prop.href || '',
+        description: prop.description?.text || '',
+        year_built: prop.description?.year_built || null,
+        lot_size: prop.description?.lot_sqft || null,
+      };
+    });
 
     console.log(`Transformed ${properties.length} properties`);
 
