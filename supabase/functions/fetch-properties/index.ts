@@ -22,9 +22,9 @@ serve(async (req) => {
     console.log('Fetching properties with filters:', filters);
 
     // Build query parameters for Realty Base US API
+    // Using SearchForSale endpoint with location parameter
     const params = new URLSearchParams({
-      location: 'city:Kensington,state_code:PA',
-      sort: 'best_match',
+      location: 'Kensington, PA',
       limit: '50',
     });
 
@@ -36,12 +36,16 @@ serve(async (req) => {
       params.append('price_max', filters.maxPrice.toString());
     }
 
-    // Add property type filter if provided
-    if (filters?.propertyType && filters.propertyType !== 'all') {
-      params.append('prop_type', filters.propertyType);
+    // Add sort parameter
+    if (filters?.sortBy) {
+      if (filters.sortBy === 'price-low') {
+        params.append('sort', 'price_low');
+      } else if (filters.sortBy === 'price-high') {
+        params.append('sort', 'price_high');
+      }
     }
 
-    const apiUrl = `https://realty-base-us.p.rapidapi.com/property/search-buy?${params.toString()}`;
+    const apiUrl = `https://realty-base-us.p.rapidapi.com/SearchForSale?${params.toString()}`;
     console.log('API URL:', apiUrl);
 
     const response = await fetch(apiUrl, {
