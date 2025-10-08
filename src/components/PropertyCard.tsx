@@ -2,12 +2,14 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Bed, Bath, Home, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface PropertyCardProps {
   property: any;
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
+  const navigate = useNavigate();
   const analysis = property.property_analysis?.[0];
 
   const formatCurrency = (amount: number) => {
@@ -101,7 +103,11 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         )}
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button className="w-full" variant="outline">
+        <Button 
+          className="w-full" 
+          variant="outline"
+          onClick={() => navigate(`/property/${property.id}`)}
+        >
           <TrendingUp className="h-4 w-4 mr-2" />
           View Full Analysis
         </Button>
