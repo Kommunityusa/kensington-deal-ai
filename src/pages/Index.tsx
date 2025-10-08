@@ -1,10 +1,40 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Search, MapPin, TrendingUp, Shield, Zap } from "lucide-react";
+import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import LandingPropertyCard from "@/components/LandingPropertyCard";
 
 const Index = () => {
+  const [properties, setProperties] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-properties', {
+        body: { 
+          filters: {
+            propertyType: 'all'
+          }
+        }
+      });
+
+      if (!error && data?.properties) {
+        // Show only first 6 properties on landing page
+        setProperties(data.properties.slice(0, 6));
+      }
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Navigation */}
@@ -46,25 +76,37 @@ const Index = () => {
               <Link to="/dashboard">Browse Listings</Link>
             </Button>
           </div>
-          <div className="grid grid-cols-3 gap-8 pt-8 max-w-2xl mx-auto">
-            <div>
-              <div className="text-3xl font-bold text-primary">15%+</div>
-              <div className="text-sm text-muted-foreground">Typical ROI</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary">50+</div>
-              <div className="text-sm text-muted-foreground">Available Listings</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary">$200K+</div>
-              <div className="text-sm text-muted-foreground">Estimated Investment</div>
-            </div>
+        </div>
+      </section>
+
+      {/* Properties Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Properties</h2>
+          <p className="text-muted-foreground text-lg">Click any property to sign up and view full details</p>
+        </div>
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+            {properties.map((property) => (
+              <LandingPropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        )}
+
+        <div className="text-center">
+          <Button size="lg" variant="hero" asChild>
+            <Link to="/auth">Sign Up to View All Properties</Link>
+          </Button>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-20 bg-muted/20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Features</h2>
           <p className="text-muted-foreground text-lg">Tools for real estate analysis</p>
