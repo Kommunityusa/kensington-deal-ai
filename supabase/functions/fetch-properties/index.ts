@@ -23,10 +23,9 @@ serve(async (req) => {
 
     // Build query parameters for Realty Base US API
     const params = new URLSearchParams({
-      city: 'Kensington',
-      state_code: 'PA',
+      location: 'city:Kensington,state_code:PA',
+      sort: 'best_match',
       limit: '50',
-      offset: '0',
     });
 
     // Add price filters if provided
@@ -42,7 +41,7 @@ serve(async (req) => {
       params.append('prop_type', filters.propertyType);
     }
 
-    const apiUrl = `https://realty-base-us.p.rapidapi.com/properties/list?${params.toString()}`;
+    const apiUrl = `https://realty-base-us.p.rapidapi.com/property/search-buy?${params.toString()}`;
     console.log('API URL:', apiUrl);
 
     const response = await fetch(apiUrl, {
