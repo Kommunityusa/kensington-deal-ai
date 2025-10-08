@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2 } from "lucide-react";
+import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingPropertyCard from "@/components/LandingPropertyCard";
@@ -102,6 +102,104 @@ const Index = () => {
           <Button size="lg" variant="hero" asChild>
             <Link to="/auth">Sign Up to View All Properties</Link>
           </Button>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
+          <p className="text-muted-foreground text-lg">Start free or unlock premium features</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Free Plan */}
+          <Card className="hover-scale">
+            <CardHeader>
+              <CardTitle className="text-2xl">Free</CardTitle>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">$0</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <CardDescription className="mt-2">
+                Get started with basic property browsing
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Browse featured properties</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Basic property information</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span>View property photos</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
+                  <span className="text-muted-foreground">Limited to 6 properties</span>
+                </li>
+              </ul>
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/auth">Sign Up Free</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Premium Plan */}
+          <Card className="hover-scale border-2 border-primary relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-gradient-primary text-white px-3 py-1 text-sm font-semibold">
+              Popular
+            </div>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Crown className="h-6 w-6 text-primary" />
+                <CardTitle className="text-2xl">Premium</CardTitle>
+              </div>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">$10</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <CardDescription className="mt-2">
+                Full access to all investment tools
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="space-y-3">
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">Unlimited property access</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">Full ROI analysis & estimates</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">Market data & comparable sales</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">Property alerts & notifications</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">Save favorite properties</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span className="font-medium">Export detailed reports</span>
+                </li>
+              </ul>
+              <Button variant="hero" className="w-full" asChild>
+                <Link to="/auth">Start Premium Trial</Link>
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
