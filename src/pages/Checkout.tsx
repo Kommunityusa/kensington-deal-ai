@@ -34,26 +34,53 @@ export default function Checkout() {
   }, [navigate]);
 
   const handleCheckout = async () => {
+    console.log('Starting checkout process...');
+    console.log('User:', user);
+    
+    if (!user) {
+      console.error('No user found');
+      toast.error('Please sign in first');
+      navigate('/auth?redirect=checkout');
+      return;
+    }
+
     setInitiatingCheckout(true);
+    
     try {
+      console.log('Invoking create-checkout function...');
       const { data, error } = await supabase.functions.invoke('create-checkout');
+      
+      console.log('Response:', { data, error });
       
       if (error) {
         console.error('Error creating checkout:', error);
-        toast.error('Failed to start checkout');
+        toast.error(`Failed to start checkout: ${error.message}`);
         setInitiatingCheckout(false);
         return;
       }
 
       if (data?.url) {
+        console.log('Redirecting to:', data.url);
         window.location.href = data.url;
+      } else {
+        console.error('No checkout URL returned');
+        toast.error('No checkout URL received');
+        setInitiatingCheckout(false);
       }
     } catch (error) {
-      console.error('Error calling create-checkout:', error);
-      toast.error('Failed to start checkout');
+      console.error('Exception calling create-checkout:', error);
+      toast.error('Failed to start checkout. Please try again.');
       setInitiatingCheckout(false);
     }
   };
+
+  // Auto-trigger checkout if user is logged in
+  useEffect(() => {
+    if (user && !loading && !initiatingCheckout) {
+      console.log('User is authenticated, auto-triggering checkout');
+      handleCheckout();
+    }
+  }, [user, loading]);
 
   if (loading) {
     return (
@@ -110,22 +137,26 @@ export default function Checkout() {
             </ul>
           </div>
 
-          <Button 
-            onClick={handleCheckout}
-            disabled={initiatingCheckout}
-            variant="hero"
-            size="lg"
-            className="w-full"
-          >
-            {initiatingCheckout ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                Starting Checkout...
-              </>
-            ) : (
-              'Continue to Checkout'
-            )}
-          </Button>
+          {initiatingCheckout ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="text-lg">Preparing your checkout...</span>
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                You&apos;ll be redirected to Stripe in a moment
+              </p>
+            </div>
+          ) : (
+            <Button 
+              onClick={handleCheckout}
+              variant="hero"
+              size="lg"
+              className="w-full"
+            >
+              Continue to Checkout
+            </Button>
+          )}
 
           <div className="text-center text-sm text-muted-foreground">
             <p>Cancel anytime. No long-term commitment.</p>
