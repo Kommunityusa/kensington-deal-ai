@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,90 +14,126 @@ serve(async (req) => {
   }
 
   try {
-    const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
-    if (!RAPIDAPI_KEY) {
-      throw new Error('RAPIDAPI_KEY is not configured');
-    }
-
     const { filters } = await req.json();
     console.log('Fetching properties with filters:', filters);
 
-    // Build query parameters for Realty Base US API
-    // Searching specifically for Kensington neighborhood in Philadelphia
-    const params = new URLSearchParams({
-      location: 'Kensington, Philadelphia, PA',
-      limit: '50',
-    });
+    // Initialize Supabase client for fallback
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-    // Add price filters if provided
+    const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
+    
+    // Try to fetch from external API first
+    if (RAPIDAPI_KEY) {
+      try {
+        // Build query parameters for Realty Base US API
+        const params = new URLSearchParams({
+          location: 'Kensington, Philadelphia, PA',
+          limit: '50',
+        });
+
+        if (filters?.minPrice) {
+          params.append('price_min', filters.minPrice.toString());
+        }
+        if (filters?.maxPrice) {
+          params.append('price_max', filters.maxPrice.toString());
+        }
+
+        const apiUrl = `https://realty-base-us.p.rapidapi.com/SearchForSale?${params.toString()}`;
+        console.log('Attempting API fetch:', apiUrl);
+
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': 'realty-base-us.p.rapidapi.com'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('API Response successful');
+
+          const properties = (data.data || []).map((prop: any) => {
+            const addressObj = prop.location?.address || prop.address || {};
+            const addressLine = addressObj.line || 
+              `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
+              'Address not available';
+            
+            return {
+              id: prop.property_id || prop.listing_id || Math.random().toString(),
+              address: addressLine,
+              city: addressObj.city || 'Philadelphia',
+              state: addressObj.state_code || addressObj.state || 'PA',
+              zip_code: addressObj.postal_code || '',
+              price: prop.list_price || prop.price || 0,
+              bedrooms: prop.description?.beds || prop.beds || 0,
+              bathrooms: prop.description?.baths_full || prop.description?.baths || prop.baths || 0,
+              square_feet: prop.description?.sqft || prop.description?.lot_sqft || 0,
+              property_type: prop.description?.type || prop.prop_type || 'townhomes',
+              image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
+              listing_url: prop.href || '',
+              description: prop.description?.text || '',
+              year_built: prop.description?.year_built || null,
+              lot_size: prop.description?.lot_sqft || null,
+            };
+          });
+
+          console.log(`Transformed ${properties.length} properties from API`);
+
+          return new Response(JSON.stringify({ properties }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          const errorText = await response.text();
+          console.warn('API request failed:', response.status, errorText);
+          console.log('Falling back to database');
+        }
+      } catch (apiError) {
+        console.warn('API error, falling back to database:', apiError);
+      }
+    } else {
+      console.log('No RAPIDAPI_KEY configured, using database');
+    }
+
+    // Fallback: Fetch from database
+    console.log('Fetching properties from database');
+    let query = supabaseClient
+      .from('properties')
+      .select(`
+        *,
+        property_analysis(*)
+      `);
+
+    // Apply filters
     if (filters?.minPrice) {
-      params.append('price_min', filters.minPrice.toString());
+      query = query.gte('price', filters.minPrice);
     }
     if (filters?.maxPrice) {
-      params.append('price_max', filters.maxPrice.toString());
+      query = query.lte('price', filters.maxPrice);
+    }
+    if (filters?.propertyType && filters.propertyType !== 'all') {
+      query = query.eq('property_type', filters.propertyType);
     }
 
-    // Add sort parameter
-    if (filters?.sortBy) {
-      if (filters.sortBy === 'price-low') {
-        params.append('sort', 'price_low');
-      } else if (filters.sortBy === 'price-high') {
-        params.append('sort', 'price_high');
-      }
+    const { data: dbProperties, error } = await query.limit(50);
+
+    if (error) {
+      console.error('Database error:', error);
+      throw error;
     }
 
-    const apiUrl = `https://realty-base-us.p.rapidapi.com/SearchForSale?${params.toString()}`;
-    console.log('API URL:', apiUrl);
+    console.log(`Fetched ${dbProperties?.length || 0} properties from database`);
 
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': RAPIDAPI_KEY,
-        'X-RapidAPI-Host': 'realty-base-us.p.rapidapi.com'
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error:', response.status, errorText);
-      throw new Error(`API request failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('API Response:', JSON.stringify(data).substring(0, 200));
-
-    // Transform API response to match our property structure
-    const properties = (data.data || []).map((prop: any) => {
-      // Build address string from address object
-      const addressObj = prop.location?.address || prop.address || {};
-      const addressLine = addressObj.line || 
-        `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
-        'Address not available';
-      
-      return {
-        id: prop.property_id || prop.listing_id || Math.random().toString(),
-        address: addressLine,
-        city: addressObj.city || 'Kensington',
-        state: addressObj.state_code || addressObj.state || 'PA',
-        zip_code: addressObj.postal_code || '',
-        price: prop.list_price || prop.price || 0,
-        bedrooms: prop.description?.beds || prop.beds || 0,
-        bathrooms: prop.description?.baths_full || prop.description?.baths || prop.baths || 0,
-        square_feet: prop.description?.sqft || prop.description?.lot_sqft || 0,
-        property_type: prop.description?.type || prop.prop_type || 'Single Family',
-        image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
-        listing_url: prop.href || '',
-        description: prop.description?.text || '',
-        year_built: prop.description?.year_built || null,
-        lot_size: prop.description?.lot_sqft || null,
-      };
-    });
-
-    console.log(`Transformed ${properties.length} properties`);
-
-    return new Response(JSON.stringify({ properties }), {
+    return new Response(JSON.stringify({ 
+      properties: dbProperties || [],
+      source: 'database'
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Error in fetch-properties function:', error);
     return new Response(JSON.stringify({ 
