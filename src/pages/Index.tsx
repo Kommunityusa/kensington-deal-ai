@@ -28,36 +28,36 @@ const Index = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-          <Badge variant="secondary" className="mb-4">Kensington, Philadelphia Investment Opportunities</Badge>
+          <Badge variant="secondary" className="mb-4">Kensington, Philadelphia Real Estate</Badge>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-            Discover High-ROI Properties in{" "}
+            Real Estate Investment Analysis for{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Kensington
             </span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Data-driven investment analysis for real estate investors targeting Philadelphia's fastest-growing neighborhood. Find undervalued properties with maximum profit potential.
+            Access property data and investment metrics for the Kensington neighborhood in Philadelphia. View property details, pricing information, and market analysis.
           </p>
           <div className="flex gap-4 justify-center pt-4">
             <Button size="lg" variant="hero" asChild>
-              <Link to="/auth">Start Analyzing Properties</Link>
+              <Link to="/auth">View Properties</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link to="/dashboard">Browse Kensington Deals</Link>
+              <Link to="/dashboard">Browse Listings</Link>
             </Button>
           </div>
           <div className="grid grid-cols-3 gap-8 pt-8 max-w-2xl mx-auto">
             <div>
               <div className="text-3xl font-bold text-primary">15%+</div>
-              <div className="text-sm text-muted-foreground">Avg ROI</div>
+              <div className="text-sm text-muted-foreground">Typical ROI</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary">50+</div>
-              <div className="text-sm text-muted-foreground">Active Listings</div>
+              <div className="text-sm text-muted-foreground">Available Listings</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary">$200K+</div>
-              <div className="text-sm text-muted-foreground">Avg Profit Potential</div>
+              <div className="text-sm text-muted-foreground">Estimated Investment</div>
             </div>
           </div>
         </div>
@@ -66,17 +66,17 @@ const Index = () => {
       {/* Features Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Invest in Kensington?</h2>
-          <p className="text-muted-foreground text-lg">The tools real estate investors need to maximize returns</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Features</h2>
+          <p className="text-muted-foreground text-lg">Tools for real estate analysis</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <Card className="hover-scale">
             <CardHeader>
               <TrendingUp className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>ROI Analysis</CardTitle>
+              <CardTitle>ROI Estimates</CardTitle>
               <CardDescription>
-                Get detailed investment return calculations on every property, including estimated renovation costs and after-repair values.
+                View estimated return on investment calculations for properties, including renovation costs and after-repair values.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -84,9 +84,9 @@ const Index = () => {
           <Card className="hover-scale">
             <CardHeader>
               <MapPin className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Kensington Focus</CardTitle>
+              <CardTitle>Neighborhood Data</CardTitle>
               <CardDescription>
-                Specialized data for Philadelphia's Kensington neighborhood, one of the city's hottest investment markets.
+                Property information focused on the Kensington neighborhood in Philadelphia.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -94,9 +94,9 @@ const Index = () => {
           <Card className="hover-scale">
             <CardHeader>
               <Search className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Market Intelligence</CardTitle>
+              <CardTitle>Market Data</CardTitle>
               <CardDescription>
-                Access real-time market data, comparable sales, and neighborhood trends to make informed investment decisions.
+                Access market information, comparable sales, and neighborhood trends for reference.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -104,9 +104,9 @@ const Index = () => {
           <Card className="hover-scale">
             <CardHeader>
               <Shield className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Risk Assessment</CardTitle>
+              <CardTitle>Property Assessment</CardTitle>
               <CardDescription>
-                Every property includes a comprehensive risk analysis to help you avoid costly mistakes and bad deals.
+                Each property includes information to help with evaluation and due diligence.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -114,9 +114,9 @@ const Index = () => {
           <Card className="hover-scale">
             <CardHeader>
               <Zap className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Deal Alerts</CardTitle>
+              <CardTitle>Notifications</CardTitle>
               <CardDescription>
-                Get notified instantly when new high-ROI properties hit the market in your target areas.
+                Receive alerts when new properties matching your criteria become available.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -124,9 +124,9 @@ const Index = () => {
           <Card className="hover-scale">
             <CardHeader>
               <Home className="h-10 w-10 text-primary mb-2" />
-              <CardTitle>Detailed Info</CardTitle>
+              <CardTitle>Property Details</CardTitle>
               <CardDescription>
-                View comprehensive property details including bedrooms, bathrooms, square footage, and more.
+                View property information including bedrooms, bathrooms, square footage, and pricing.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -137,12 +137,12 @@ const Index = () => {
       <section className="container mx-auto px-4 py-20">
         <Card className="bg-gradient-primary text-white border-0 shadow-xl">
           <CardContent className="py-16 text-center space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">Ready to Build Your Real Estate Portfolio?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">Explore Kensington Properties</h2>
             <p className="text-lg text-white/90 max-w-2xl mx-auto">
-              Join savvy investors who are capitalizing on Kensington's growth. Start analyzing profitable deals today.
+              Browse available properties and access detailed investment information.
             </p>
             <Button size="lg" variant="secondary" asChild className="shadow-lg">
-              <Link to="/auth">Get Started Now</Link>
+              <Link to="/auth">Get Started</Link>
             </Button>
           </CardContent>
         </Card>
