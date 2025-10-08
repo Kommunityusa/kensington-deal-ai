@@ -22,9 +22,9 @@ serve(async (req) => {
     console.log('Fetching properties with filters:', filters);
 
     // Build query parameters for Realty Base US API
-    // Using SearchForSale endpoint with location parameter
+    // Searching specifically for Kensington neighborhood in Philadelphia
     const params = new URLSearchParams({
-      location: 'Kensington, PA',
+      location: 'Kensington, Philadelphia, PA',
       limit: '50',
     });
 
