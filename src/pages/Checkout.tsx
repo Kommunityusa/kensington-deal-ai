@@ -80,7 +80,7 @@ export default function Checkout() {
       console.log('User is authenticated, auto-triggering checkout');
       handleCheckout();
     }
-  }, [user, loading]);
+  }, [user, loading, initiatingCheckout]);
 
   if (loading) {
     return (
