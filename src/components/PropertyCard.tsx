@@ -56,14 +56,6 @@ export default function PropertyCard({ property, isPremium = false }: PropertyCa
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-bold text-2xl">{formatCurrency(property.price)}</h3>
-          {analysis && (
-            <div className="text-right">
-              <div className={`font-semibold ${getRoiColor(analysis.estimated_roi)}`}>
-                {analysis.estimated_roi.toFixed(1)}% ROI
-              </div>
-              <div className="text-xs text-muted-foreground">Potential</div>
-            </div>
-          )}
         </div>
         
         <div className="flex items-center text-sm text-muted-foreground mb-3">
@@ -86,26 +78,40 @@ export default function PropertyCard({ property, isPremium = false }: PropertyCa
           </div>
         </div>
 
-        {isPremium && analysis && (
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Suggested Offer:</span>
-              <span className="font-semibold">{formatCurrency(analysis.suggested_offer_price)}</span>
+        {/* Basic analysis for all users */}
+        {analysis && (
+          <div className="space-y-1 text-sm border-t pt-3">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-semibold flex items-center gap-1">
+                <TrendingUp className="h-4 w-4" />
+                Basic Analysis
+              </span>
+              <div className={`font-semibold ${getRoiColor(analysis.estimated_roi)}`}>
+                {analysis.estimated_roi.toFixed(1)}% ROI
+              </div>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Est. Renovation:</span>
-              <span className="font-semibold">{formatCurrency(analysis.estimated_renovation_cost)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">After Repair Value:</span>
+              <span className="text-muted-foreground">Estimated Value:</span>
               <span className="font-semibold">{formatCurrency(analysis.estimated_arv)}</span>
             </div>
+            {isPremium && (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Suggested Offer:</span>
+                  <span className="font-semibold">{formatCurrency(analysis.suggested_offer_price)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Est. Renovation:</span>
+                  <span className="font-semibold">{formatCurrency(analysis.estimated_renovation_cost)}</span>
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {!isPremium && (
-          <div className="text-sm text-muted-foreground text-center py-2 border-t">
-            🔒 Upgrade to Premium to see ROI analysis
+          <div className="text-xs text-muted-foreground text-center py-2 border-t mt-2">
+            ⭐ Upgrade to see detailed financial breakdown
           </div>
         )}
       </CardContent>
