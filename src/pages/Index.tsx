@@ -12,7 +12,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Home className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">PropertyFinder</span>
+            <span className="text-xl font-bold">Kensington Deals</span>
           </div>
           <div className="flex gap-3">
             <Button variant="ghost" asChild>
@@ -151,7 +151,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t mt-20">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p>© 2025 PropertyFinder. All rights reserved.</p>
+          <p>© 2025 Kensington Deals. All rights reserved.</p>
         </div>
       </footer>
     </div>
