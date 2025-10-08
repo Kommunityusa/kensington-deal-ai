@@ -15,18 +15,14 @@ export default function Checkout() {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, 'Has user:', !!session?.user);
       setUser(session?.user ?? null);
-      if (!session) {
-        // Not logged in, redirect to auth
-        navigate("/auth?redirect=checkout");
-      }
+      setLoading(false);
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', 'Has user:', !!session?.user);
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth?redirect=checkout");
-      }
       setLoading(false);
     });
 
@@ -86,6 +82,40 @@ export default function Checkout() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If not logged in, show sign-in prompt
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader className="text-center">
+            <Crown className="h-12 w-12 text-primary mx-auto mb-4" />
+            <CardTitle className="text-2xl">Sign In Required</CardTitle>
+            <CardDescription>
+              Please sign in to continue with your premium subscription
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button 
+              onClick={() => navigate('/auth?redirect=checkout')}
+              variant="hero"
+              size="lg"
+              className="w-full"
+            >
+              Sign In / Sign Up
+            </Button>
+            <Button 
+              onClick={() => navigate("/")}
+              variant="ghost"
+              className="w-full"
+            >
+              Back to Home
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
