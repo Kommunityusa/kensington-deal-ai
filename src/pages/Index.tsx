@@ -142,6 +142,10 @@ const Index = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <span>Basic property analysis</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                   <span>View property photos</span>
                 </li>
                 <li className="flex items-start gap-2">
