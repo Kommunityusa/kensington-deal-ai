@@ -196,7 +196,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button variant="hero" className="w-full" asChild>
-                <Link to="/auth">Start Premium Trial</Link>
+                <Link to="/checkout">Get Premium Now</Link>
               </Button>
             </CardContent>
           </Card>
