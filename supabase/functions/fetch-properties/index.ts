@@ -123,31 +123,29 @@ serve(async (req) => {
         if (zillowResponse.ok) {
           const zillowData = await zillowResponse.json();
           console.log('Zillow API Response successful');
+          console.log('Zillow data structure:', JSON.stringify(zillowData).substring(0, 500));
 
-          const properties = (zillowData.props || [])
-            .filter((prop: any) => {
-              const address = prop.address || '';
-              return address.toLowerCase().includes('kensington') || 
-                     prop.zipcode === '19125' || 
-                     prop.zipcode === '19134';
-            })
+          // Zillow API may return data in different formats
+          const propertyList = zillowData.props || zillowData.results || zillowData.data || [];
+          
+          const properties = propertyList
             .slice(0, 50)
             .map((prop: any) => ({
-              id: prop.zpid || Math.random().toString(),
-              address: prop.address || 'Address not available',
-              city: prop.addressCity || 'Philadelphia',
-              state: prop.addressState || 'PA',
-              zip_code: prop.zipcode || '',
-              price: prop.price || 0,
-              bedrooms: prop.bedrooms || 0,
-              bathrooms: prop.bathrooms || 0,
-              square_feet: prop.livingArea || 0,
-              property_type: prop.propertyType || 'townhomes',
-              image_url: prop.imgSrc || '',
-              listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : '',
-              description: '',
-              year_built: prop.yearBuilt || null,
-              lot_size: prop.lotAreaValue || null,
+              id: prop.zpid?.toString() || prop.id?.toString() || Math.random().toString(),
+              address: prop.address || prop.streetAddress || 'Address not available',
+              city: prop.addressCity || prop.city || 'Philadelphia',
+              state: prop.addressState || prop.state || 'PA',
+              zip_code: prop.zipcode || prop.zip || prop.postalCode || '',
+              price: prop.price || prop.listPrice || 0,
+              bedrooms: prop.bedrooms || prop.beds || 0,
+              bathrooms: prop.bathrooms || prop.baths || 0,
+              square_feet: prop.livingArea || prop.sqft || prop.squareFeet || 0,
+              property_type: prop.propertyType || prop.homeType || 'Houses',
+              image_url: prop.imgSrc || prop.image || prop.photo || '',
+              listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : (prop.url || ''),
+              description: prop.description || '',
+              year_built: prop.yearBuilt || prop.year || null,
+              lot_size: prop.lotAreaValue || prop.lotSize || null,
             }));
 
           console.log(`Transformed ${properties.length} properties from Zillow API`);
