@@ -44,13 +44,18 @@ const Index = () => {
             <Home className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">Kensington Deals</span>
           </div>
-          <div className="flex gap-3">
-            <Button variant="ghost" asChild>
-              <Link to="/auth">Sign In</Link>
-            </Button>
-            <Button variant="default" asChild>
-              <Link to="/auth">Get Started</Link>
-            </Button>
+          <div className="flex items-center gap-6">
+            <Link to="/about" className="text-sm hover:text-primary transition-colors">
+              About
+            </Link>
+            <div className="flex gap-3">
+              <Button variant="ghost" asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+              <Button variant="default" asChild>
+                <Link to="/checkout">Get Started</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </nav>

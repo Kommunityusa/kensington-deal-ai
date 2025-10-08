@@ -105,6 +105,8 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const displayedProperties = subscription.subscribed ? properties : properties.slice(0, 6);
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation user={user} />
@@ -113,7 +115,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-4xl font-bold mb-2">Kensington Investment Opportunities</h1>
-              <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia's Kensington neighborhood</p>
+              <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
             
             {!subscription.subscribed && (
@@ -155,6 +157,16 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {!subscription.subscribed && (
+          <Card className="mb-6 border-primary/50 bg-primary/5">
+            <CardContent className="py-4">
+              <p className="text-sm text-muted-foreground text-center">
+                <strong>Free tier:</strong> You can view {displayedProperties.length} properties. Upgrade to Premium for unlimited access and full ROI analysis.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
         <PropertyFilters filters={filters} setFilters={setFilters} />
 
         {loading ? (
@@ -162,11 +174,30 @@ export default function Dashboard() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedProperties.map((property) => (
+                <PropertyCard key={property.id} property={property} isPremium={subscription.subscribed} />
+              ))}
+            </div>
+            
+            {!subscription.subscribed && properties.length > 6 && (
+              <Card className="mt-8 bg-gradient-primary text-white border-0">
+                <CardContent className="py-8 text-center space-y-4">
+                  <Crown className="h-12 w-12 mx-auto" />
+                  <h3 className="text-2xl font-bold">Want to see {properties.length - 6} more properties?</h3>
+                  <p className="text-white/90">Upgrade to Premium for unlimited property access and full analysis</p>
+                  <Button 
+                    onClick={subscription.createCheckout}
+                    variant="secondary"
+                    size="lg"
+                  >
+                    Upgrade to Premium - $10/month
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
 
         {!loading && properties.length === 0 && (

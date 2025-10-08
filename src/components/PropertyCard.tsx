@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 
 interface PropertyCardProps {
   property: any;
+  isPremium?: boolean;
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+export default function PropertyCard({ property, isPremium = false }: PropertyCardProps) {
   const navigate = useNavigate();
   const analysis = property.property_analysis?.[0];
 
@@ -85,7 +86,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </div>
         </div>
 
-        {analysis && (
+        {isPremium && analysis && (
           <div className="space-y-1 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Suggested Offer:</span>
@@ -101,16 +102,32 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             </div>
           </div>
         )}
+
+        {!isPremium && (
+          <div className="text-sm text-muted-foreground text-center py-2 border-t">
+            🔒 Upgrade to Premium to see ROI analysis
+          </div>
+        )}
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <Button 
-          className="w-full" 
-          variant="outline"
-          onClick={() => navigate(`/property/${property.id}`, { state: { property } })}
-        >
-          <TrendingUp className="h-4 w-4 mr-2" />
-          View Full Analysis
-        </Button>
+        {isPremium ? (
+          <Button 
+            className="w-full" 
+            variant="outline"
+            onClick={() => navigate(`/property/${property.id}`, { state: { property } })}
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            View Full Analysis
+          </Button>
+        ) : (
+          <Button 
+            className="w-full" 
+            variant="outline"
+            onClick={() => navigate('/checkout')}
+          >
+            🔒 Upgrade to View Analysis
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
