@@ -25,10 +25,10 @@ serve(async (req) => {
 
     const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
     
-    // Try to fetch from external API first
+    // Try to fetch from external APIs first
     if (RAPIDAPI_KEY) {
+      // Try Realty Base US API first
       try {
-        // Build query parameters for Realty Base US API
         const params = new URLSearchParams({
           location: 'Kensington, Philadelphia, PA',
           limit: '50',
@@ -42,7 +42,7 @@ serve(async (req) => {
         }
 
         const apiUrl = `https://realty-base-us.p.rapidapi.com/SearchForSale?${params.toString()}`;
-        console.log('Attempting API fetch:', apiUrl);
+        console.log('Attempting Realty Base API fetch:', apiUrl);
 
         const response = await fetch(apiUrl, {
           method: 'GET',
@@ -54,7 +54,7 @@ serve(async (req) => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('API Response successful');
+          console.log('Realty Base API Response successful');
 
           const properties = (data.data || []).map((prop: any) => {
             const addressObj = prop.location?.address || prop.address || {};
@@ -81,19 +81,87 @@ serve(async (req) => {
             };
           });
 
-          console.log(`Transformed ${properties.length} properties from API`);
+          console.log(`Transformed ${properties.length} properties from Realty Base API`);
 
-          return new Response(JSON.stringify({ properties }), {
+          return new Response(JSON.stringify({ properties, source: 'realty-base' }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         } else {
-          const errorText = await response.text();
-          console.warn('API request failed:', response.status, errorText);
-          console.log('Falling back to database');
+          console.warn('Realty Base API failed:', response.status);
         }
       } catch (apiError) {
-        console.warn('API error, falling back to database:', apiError);
+        console.warn('Realty Base API error:', apiError);
       }
+
+      // Try Zillow API as fallback
+      try {
+        console.log('Attempting Zillow API fetch');
+        
+        const zillowParams = new URLSearchParams({
+          location: 'Philadelphia, PA',
+          status: 'forSale',
+        });
+
+        if (filters?.minPrice) {
+          zillowParams.append('price_min', filters.minPrice.toString());
+        }
+        if (filters?.maxPrice) {
+          zillowParams.append('price_max', filters.maxPrice.toString());
+        }
+
+        const zillowUrl = `https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?${zillowParams.toString()}`;
+
+        const zillowResponse = await fetch(zillowUrl, {
+          method: 'GET',
+          headers: {
+            'X-RapidAPI-Key': RAPIDAPI_KEY,
+            'X-RapidAPI-Host': 'zillow-com1.p.rapidapi.com'
+          }
+        });
+
+        if (zillowResponse.ok) {
+          const zillowData = await zillowResponse.json();
+          console.log('Zillow API Response successful');
+
+          const properties = (zillowData.props || [])
+            .filter((prop: any) => {
+              const address = prop.address || '';
+              return address.toLowerCase().includes('kensington') || 
+                     prop.zipcode === '19125' || 
+                     prop.zipcode === '19134';
+            })
+            .slice(0, 50)
+            .map((prop: any) => ({
+              id: prop.zpid || Math.random().toString(),
+              address: prop.address || 'Address not available',
+              city: prop.addressCity || 'Philadelphia',
+              state: prop.addressState || 'PA',
+              zip_code: prop.zipcode || '',
+              price: prop.price || 0,
+              bedrooms: prop.bedrooms || 0,
+              bathrooms: prop.bathrooms || 0,
+              square_feet: prop.livingArea || 0,
+              property_type: prop.propertyType || 'townhomes',
+              image_url: prop.imgSrc || '',
+              listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : '',
+              description: '',
+              year_built: prop.yearBuilt || null,
+              lot_size: prop.lotAreaValue || null,
+            }));
+
+          console.log(`Transformed ${properties.length} properties from Zillow API`);
+
+          return new Response(JSON.stringify({ properties, source: 'zillow' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          console.warn('Zillow API failed:', zillowResponse.status);
+        }
+      } catch (zillowError) {
+        console.warn('Zillow API error:', zillowError);
+      }
+
+      console.log('All APIs failed, falling back to database');
     } else {
       console.log('No RAPIDAPI_KEY configured, using database');
     }
