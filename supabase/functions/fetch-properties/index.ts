@@ -98,8 +98,9 @@ serve(async (req) => {
         console.log('Attempting Zillow API fetch');
         
         const zillowParams = new URLSearchParams({
-          location: 'Philadelphia, PA',
-          status: 'forSale',
+          location: 'Kensington, Philadelphia, PA',
+          status_type: 'ForSale',
+          home_type: 'Houses'
         });
 
         if (filters?.minPrice) {
@@ -114,8 +115,8 @@ serve(async (req) => {
         const zillowResponse = await fetch(zillowUrl, {
           method: 'GET',
           headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'zillow-com1.p.rapidapi.com'
+            'x-rapidapi-key': RAPIDAPI_KEY,
+            'x-rapidapi-host': 'zillow-com1.p.rapidapi.com'
           }
         });
 
