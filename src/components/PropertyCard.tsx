@@ -106,7 +106,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         <Button 
           className="w-full" 
           variant="outline"
-          onClick={() => navigate(`/property/${property.id}`)}
+          onClick={() => navigate(`/property/${property.id}`, { state: { property } })}
         >
           <TrendingUp className="h-4 w-4 mr-2" />
           View Full Analysis
