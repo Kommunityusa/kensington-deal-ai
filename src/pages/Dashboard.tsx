@@ -26,6 +26,18 @@ export default function Dashboard() {
 
   const subscription = useSubscription(user);
 
+  // Redirect to checkout if user is authenticated but doesn't have an active subscription
+  useEffect(() => {
+    if (user && !subscription.loading && !subscription.subscribed) {
+      const checkout = searchParams.get('checkout');
+      // Only redirect if not coming back from checkout
+      if (checkout !== 'cancel') {
+        toast.error('Premium subscription required to access the dashboard');
+        navigate('/checkout');
+      }
+    }
+  }, [user, subscription.loading, subscription.subscribed, searchParams, navigate]);
+
   useEffect(() => {
     // Check for checkout success/cancel
     const checkout = searchParams.get('checkout');
