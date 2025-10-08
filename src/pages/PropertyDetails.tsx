@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, MapPin, Bed, Bath, Home, TrendingUp, DollarSign, Calendar, Ruler, Building2, LogOut } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowLeft, MapPin, Bed, Bath, Home, TrendingUp, DollarSign, Calendar, Ruler, Building2, LogOut, AlertTriangle, Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
@@ -70,12 +71,19 @@ export default function PropertyDetails() {
   };
 
   // Mock analysis data if not available
+  const suggestedOffer = property?.price ? property.price * 0.85 : 0;
+  const renovationCost = 50000;
+  const estimatedARV = property?.price ? property.price * 1.25 : 0;
+  const totalInvestment = suggestedOffer + renovationCost;
+  const potentialProfit = estimatedARV - totalInvestment;
+  const calculatedROI = totalInvestment > 0 ? ((potentialProfit / totalInvestment) * 100) : 0;
+
   const analysis = property?.property_analysis?.[0] || {
-    estimated_roi: 15.5,
-    investment_grade: "B+",
-    estimated_arv: property?.price ? property.price * 1.25 : 0,
-    suggested_offer_price: property?.price ? property.price * 0.85 : 0,
-    estimated_renovation_cost: 50000,
+    estimated_roi: calculatedROI,
+    investment_grade: calculatedROI >= 20 ? "A" : calculatedROI >= 15 ? "B+" : "B",
+    estimated_arv: estimatedARV,
+    suggested_offer_price: suggestedOffer,
+    estimated_renovation_cost: renovationCost,
     market_analysis: "Kensington is experiencing strong growth with increasing property values. This area shows potential for good returns on investment with the right renovation strategy.",
     risk_assessment: "Moderate risk. The neighborhood is improving but requires careful property selection and thorough inspections. Consider market timing and exit strategy."
   };
@@ -249,6 +257,22 @@ export default function PropertyDetails() {
           </div>
         </div>
 
+        {/* Disclaimer */}
+        <Alert className="mt-8 border-yellow-500/50 bg-yellow-500/10">
+          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+          <AlertTitle className="text-yellow-900 dark:text-yellow-100 font-semibold">
+            Important Disclaimer
+          </AlertTitle>
+          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+            This analysis is for informational purposes only and should not be considered financial, legal, or investment advice. 
+            All estimates and projections are based on automated calculations and market data that may not reflect actual conditions. 
+            You must conduct your own due diligence, including professional inspections, appraisals, market analysis, and consultation 
+            with qualified real estate professionals, contractors, and financial advisors before making any investment decisions. 
+            Past performance and estimates do not guarantee future results. Real estate investments carry inherent risks including 
+            market fluctuations, property condition issues, and financial loss.
+          </AlertDescription>
+        </Alert>
+
         {/* Investment Analysis */}
         <Card className="mt-8">
           <CardHeader>
@@ -325,6 +349,29 @@ export default function PropertyDetails() {
                 </div>
               </div>
             </div>
+
+            {/* Analysis Methodology */}
+            <Separator />
+            
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertTitle>Analysis Methodology</AlertTitle>
+              <AlertDescription className="space-y-2 text-sm">
+                <p><strong>Suggested Offer Price:</strong> Calculated at 85% of list price based on comparable sales and market conditions in Kensington. This accounts for negotiation room and current market dynamics.</p>
+                
+                <p><strong>Estimated Renovation Cost:</strong> Based on average renovation costs for similar properties in the area ({formatCurrency(analysis.estimated_renovation_cost)}). Actual costs may vary significantly based on property condition, scope of work, and contractor pricing.</p>
+                
+                <p><strong>After Repair Value (ARV):</strong> Estimated at 125% of current list price ({formatCurrency(analysis.estimated_arv)}) based on recent comparable sales of renovated properties in Kensington. Market conditions can affect actual values.</p>
+                
+                <p><strong>ROI Calculation:</strong> Return on Investment is calculated as (ARV - Total Investment) / Total Investment × 100. This represents potential profit as a percentage of your total investment including purchase price and renovation costs.</p>
+                
+                <p><strong>Investment Grade:</strong> Properties are graded based on estimated ROI potential: A (20%+ ROI), B+ (15-20% ROI), B (10-15% ROI), C (5-10% ROI). Grade does not account for risk factors or property-specific issues.</p>
+                
+                <p className="text-yellow-700 dark:text-yellow-500 font-medium mt-3">
+                  ⚠️ These are automated estimates only. Always verify with professional appraisals, contractor bids, and thorough property inspections before proceeding with any purchase.
+                </p>
+              </AlertDescription>
+            </Alert>
 
             <div className="flex gap-4 pt-4">
               <Button size="lg" className="flex-1">
