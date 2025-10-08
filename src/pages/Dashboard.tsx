@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
-import { Loader2 } from "lucide-react";
+import { Loader2, Crown } from "lucide-react";
 import { toast } from "sonner";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +23,19 @@ export default function Dashboard() {
     propertyType: "all",
     sortBy: "newest"
   });
+
+  const subscription = useSubscription(user);
+
+  useEffect(() => {
+    // Check for checkout success/cancel
+    const checkout = searchParams.get('checkout');
+    if (checkout === 'success') {
+      toast.success('Successfully subscribed to Premium!');
+      subscription.checkSubscription();
+    } else if (checkout === 'cancel') {
+      toast.error('Checkout canceled');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -93,8 +110,49 @@ export default function Dashboard() {
       <Navigation user={user} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Kensington Investment Opportunities</h1>
-          <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia's Kensington neighborhood</p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Kensington Investment Opportunities</h1>
+              <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia's Kensington neighborhood</p>
+            </div>
+            
+            {!subscription.subscribed && (
+              <Card className="bg-gradient-primary text-white border-0">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-5 w-5" />
+                    <CardTitle className="text-lg">Upgrade to Premium</CardTitle>
+                  </div>
+                  <CardDescription className="text-white/90">
+                    Get unlimited access for $10/month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    onClick={subscription.createCheckout}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    Subscribe Now
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+            
+            {subscription.subscribed && (
+              <Card className="border-2 border-primary">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <Crown className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">Premium Active</CardTitle>
+                  </div>
+                  <CardDescription>
+                    {subscription.subscription_end && `Renews ${new Date(subscription.subscription_end).toLocaleDateString()}`}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
+          </div>
         </div>
 
         <PropertyFilters filters={filters} setFilters={setFilters} />
