@@ -18,6 +18,7 @@ const Index = () => {
   }, []);
 
   const fetchProperties = async () => {
+    console.log('Starting to fetch properties...');
     try {
       const { data, error } = await supabase.functions.invoke('fetch-properties', {
         body: { 
@@ -27,9 +28,18 @@ const Index = () => {
         }
       });
 
+      console.log('Fetch properties response:', { data, error });
+
+      if (error) {
+        console.error('Error from edge function:', error);
+      }
+
       if (!error && data?.properties) {
+        console.log(`Received ${data.properties.length} properties`);
         // Show only first 6 properties on landing page
         setProperties(data.properties.slice(0, 6));
+      } else {
+        console.log('No properties in response');
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
