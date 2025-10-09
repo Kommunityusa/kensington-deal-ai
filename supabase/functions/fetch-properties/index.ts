@@ -225,9 +225,13 @@ serve(async (req) => {
 
           console.log(`Transformed ${properties.length} properties from Zillow API`);
 
-          return new Response(JSON.stringify({ properties, source: 'zillow' }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
+          if (properties.length > 0) {
+            return new Response(JSON.stringify({ properties, source: 'zillow' }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          } else {
+            console.log('Zillow returned 0 properties, falling back to database');
+          }
         } else {
           console.warn('Zillow API failed:', zillowResponse.status);
         }
