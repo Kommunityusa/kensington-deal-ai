@@ -107,6 +107,9 @@ export default function Dashboard() {
 
   const displayedProperties = subscription.subscribed ? properties : properties.slice(0, 6);
 
+  // Show loading state if either properties or subscription is still loading
+  const isLoading = loading || subscription.loading;
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation user={user} />
@@ -118,7 +121,7 @@ export default function Dashboard() {
               <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
             
-            {!subscription.subscribed && (
+            {!subscription.loading && !subscription.subscribed && (
               <Card className="bg-gradient-primary text-white border-0">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
@@ -141,7 +144,7 @@ export default function Dashboard() {
               </Card>
             )}
             
-            {subscription.subscribed && (
+            {!subscription.loading && subscription.subscribed && (
               <Card className="border-2 border-primary">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-2">
@@ -157,7 +160,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {!subscription.subscribed && (
+        {!subscription.loading && !subscription.subscribed && (
           <Card className="mb-6 border-primary/50 bg-primary/5">
             <CardContent className="py-4">
               <p className="text-sm text-muted-foreground text-center">
@@ -169,7 +172,7 @@ export default function Dashboard() {
 
         <PropertyFilters filters={filters} setFilters={setFilters} />
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
