@@ -117,6 +117,16 @@ serve(async (req) => {
 
       const fetchedIds = new Set<string>();
 
+      // Log API responses
+      console.log('API Responses:', {
+        realtor16: realtor16Data ? 'success' : 'null',
+        realty: realtyData ? 'success' : 'null',
+        loopNet19125: loopNet19125Data ? 'success' : 'null',
+        loopNet19134: loopNet19134Data ? 'success' : 'null',
+        zillow: zillowData ? 'success' : 'null',
+        redfin: redfinData ? 'success' : 'null'
+      });
+
       // Process Realtor16 results
       if (realtor16Data?.data?.home_search?.results) {
         const realtor16Properties = realtor16Data.data.home_search.results.map((prop: any) => {
@@ -151,6 +161,8 @@ serve(async (req) => {
         });
         allProperties.push(...realtor16Properties);
         console.log(`Added ${realtor16Properties.length} properties from Realtor16`);
+      } else {
+        console.log('Realtor16 data structure:', realtor16Data ? JSON.stringify(Object.keys(realtor16Data)).slice(0, 200) : 'null');
       }
 
       // Process Realty-in-US results
@@ -187,6 +199,8 @@ serve(async (req) => {
         });
         allProperties.push(...realtyProperties);
         console.log(`Added ${realtyProperties.length} properties from Realty-in-US`);
+      } else {
+        console.log('Realty-in-US data structure:', realtyData ? JSON.stringify(Object.keys(realtyData)).slice(0, 200) : 'null');
       }
 
       // Process LoopNet results
@@ -223,11 +237,17 @@ serve(async (req) => {
         });
         allProperties.push(...loopNetProperties);
         console.log(`Added ${loopNetProperties.length} properties from LoopNet`);
+      } else {
+        console.log('LoopNet data structure:', {
+          zip19125: loopNet19125Data ? Object.keys(loopNet19125Data) : 'null',
+          zip19134: loopNet19134Data ? Object.keys(loopNet19134Data) : 'null'
+        });
       }
 
       // Process Zillow results
       if (zillowData) {
         const propertyList = zillowData.props || zillowData.results || zillowData.data || [];
+        console.log(`Zillow returned ${propertyList.length} properties`);
         const zillowProperties = propertyList.slice(0, 50).map((prop: any) => {
           const externalId = `zillow-${prop.zpid || prop.id || Math.random()}`;
           fetchedIds.add(externalId);
@@ -255,11 +275,14 @@ serve(async (req) => {
         });
         allProperties.push(...zillowProperties);
         console.log(`Added ${zillowProperties.length} properties from Zillow`);
+      } else {
+        console.log('Zillow returned null response');
       }
 
       // Process Redfin results
       if (redfinData) {
         const propertyList = redfinData.homes || redfinData.data || redfinData.results || [];
+        console.log(`Redfin returned ${propertyList.length} properties`);
         const redfinProperties = propertyList.slice(0, 50).map((prop: any) => {
           const externalId = `redfin-${prop.propertyId || prop.mlsId || Math.random()}`;
           fetchedIds.add(externalId);
@@ -287,6 +310,8 @@ serve(async (req) => {
         });
         allProperties.push(...redfinProperties);
         console.log(`Added ${redfinProperties.length} properties from Redfin`);
+      } else {
+        console.log('Redfin data structure:', redfinData ? Object.keys(redfinData) : 'null');
       }
 
       console.log(`Total properties from all APIs: ${allProperties.length}`);
