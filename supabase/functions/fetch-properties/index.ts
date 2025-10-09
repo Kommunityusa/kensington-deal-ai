@@ -398,12 +398,14 @@ serve(async (req) => {
       }
 
       // Mark properties as inactive if they weren't found in the latest fetch
-      const staleIds = Array.from(existingIds).filter(id => !fetchedIds.has(id));
+      // Only mark properties with external_id as stale (properties from APIs)
+      const staleIds = Array.from(existingIds).filter(id => id && !fetchedIds.has(id));
       if (staleIds.length > 0) {
         const { error: updateError } = await supabaseClient
           .from('properties')
           .update({ is_active: false })
-          .in('external_id', staleIds);
+          .in('external_id', staleIds)
+          .not('external_id', 'is', null); // Only update properties that have an external_id
         
         if (updateError) {
           console.error('Error marking stale properties:', updateError);
