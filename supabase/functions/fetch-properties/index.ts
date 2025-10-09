@@ -239,6 +239,63 @@ serve(async (req) => {
         console.warn('Zillow API error:', zillowError);
       }
 
+      // Try Redfin API
+      try {
+        console.log('Attempting Redfin API fetch');
+        
+        const redfinUrl = 'https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Kensington, Philadelphia, PA';
+
+        const redfinResponse = await fetch(redfinUrl, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key': RAPIDAPI_KEY,
+            'x-rapidapi-host': 'redfin-com-data.p.rapidapi.com'
+          }
+        });
+
+        if (redfinResponse.ok) {
+          const redfinData = await redfinResponse.json();
+          console.log('Redfin API Response successful');
+          console.log('Redfin data structure:', JSON.stringify(redfinData).substring(0, 500));
+
+          const propertyList = redfinData.homes || redfinData.data || redfinData.results || [];
+          
+          const properties = propertyList
+            .slice(0, 50)
+            .map((prop: any) => ({
+              id: prop.propertyId?.toString() || prop.mlsId?.toString() || Math.random().toString(),
+              address: prop.streetLine?.value || prop.address || 'Address not available',
+              city: prop.city || 'Philadelphia',
+              state: prop.state || 'PA',
+              zip_code: prop.zip || prop.zipCode || '',
+              price: prop.price?.value || prop.listPrice || 0,
+              bedrooms: prop.beds || 0,
+              bathrooms: prop.baths || 0,
+              square_feet: prop.sqFt?.value || prop.sqft || 0,
+              property_type: prop.propertyType || 'Houses',
+              image_url: prop.photos?.[0]?.url || prop.photoUrl || '',
+              listing_url: prop.url || '',
+              description: prop.listingRemarks || '',
+              year_built: prop.yearBuilt || null,
+              lot_size: prop.lotSize?.value || null,
+            }));
+
+          console.log(`Transformed ${properties.length} properties from Redfin API`);
+
+          if (properties.length > 0) {
+            return new Response(JSON.stringify({ properties, source: 'redfin' }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          } else {
+            console.log('Redfin returned 0 properties, falling back to database');
+          }
+        } else {
+          console.warn('Redfin API failed:', redfinResponse.status);
+        }
+      } catch (redfinError) {
+        console.warn('Redfin API error:', redfinError);
+      }
+
       console.log('All APIs failed, falling back to database');
     } else {
       console.log('No RAPIDAPI_KEY configured, using database');
