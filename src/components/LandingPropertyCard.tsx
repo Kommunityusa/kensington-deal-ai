@@ -44,11 +44,6 @@ export default function LandingPropertyCard({ property }: LandingPropertyCardPro
               <Home className="h-16 w-16 text-muted-foreground" />
             </div>
           )}
-          <div className="absolute top-2 right-2">
-            <Badge variant="secondary" className="bg-background/90">
-              {property.property_type}
-            </Badge>
-          </div>
         </div>
       </CardHeader>
       <CardContent className="p-4">
