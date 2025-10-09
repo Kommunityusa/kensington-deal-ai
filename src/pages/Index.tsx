@@ -115,6 +115,9 @@ const Index = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
           <p className="text-muted-foreground text-lg">Start free or unlock premium features</p>
+          <Badge variant="secondary" className="mt-4 text-base px-4 py-2">
+            🎓 Free forever for Jumpstart Kensington Graduates
+          </Badge>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
