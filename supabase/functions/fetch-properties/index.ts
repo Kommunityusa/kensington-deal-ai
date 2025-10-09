@@ -322,17 +322,26 @@ serve(async (req) => {
       const uniqueProperties = new Map();
       
       allProperties.forEach(property => {
+        // Create a more robust normalized address key
         const normalizedAddress = property.address
           .toLowerCase()
-          .replace(/[.,\s-]/g, '');
+          .replace(/[.,\s-]/g, '')
+          .replace(/street/g, 'st')
+          .replace(/avenue/g, 'ave')
+          .replace(/road/g, 'rd')
+          .replace(/boulevard/g, 'blvd')
+          .replace(/drive/g, 'dr');
         
+        // Only keep the first occurrence of each unique address
         if (!uniqueProperties.has(normalizedAddress)) {
           uniqueProperties.set(normalizedAddress, property);
+        } else {
+          console.log(`Duplicate found: ${property.address} (source: ${property.source})`);
         }
       });
 
       const deduplicatedProperties = Array.from(uniqueProperties.values());
-      console.log(`Properties after deduplication: ${deduplicatedProperties.length}`);
+      console.log(`Properties after deduplication: ${deduplicatedProperties.length} (removed ${allProperties.length - deduplicatedProperties.length} duplicates)`);
 
       // Separate new and existing properties
       const newProperties = deduplicatedProperties.filter(p => !existingIds.has(p.external_id));
@@ -382,8 +391,46 @@ serve(async (req) => {
           console.log(`Marked ${staleIds.length} properties as inactive`);
         }
       }
-    } else {
-      console.log('No RAPIDAPI_KEY configured');
+    }
+
+    // Clean up duplicate properties in the database based on address
+    console.log('Checking for duplicates in database...');
+    const { data: allDbProperties } = await supabaseClient
+      .from('properties')
+      .select('id, address, created_at')
+      .eq('is_active', true)
+      .order('created_at', { ascending: true });
+
+    if (allDbProperties && allDbProperties.length > 0) {
+      const seenAddresses = new Map();
+      const duplicateIds: string[] = [];
+
+      allDbProperties.forEach(prop => {
+        const normalizedAddr = prop.address
+          .toLowerCase()
+          .replace(/[.,\s-]/g, '')
+          .replace(/street/g, 'st')
+          .replace(/avenue/g, 'ave')
+          .replace(/road/g, 'rd')
+          .replace(/boulevard/g, 'blvd')
+          .replace(/drive/g, 'dr');
+
+        if (seenAddresses.has(normalizedAddr)) {
+          duplicateIds.push(prop.id);
+        } else {
+          seenAddresses.set(normalizedAddr, prop.id);
+        }
+      });
+
+      if (duplicateIds.length > 0) {
+        console.log(`Found ${duplicateIds.length} duplicate properties in database, marking as inactive`);
+        await supabaseClient
+          .from('properties')
+          .update({ is_active: false })
+          .in('id', duplicateIds);
+      } else {
+        console.log('No duplicates found in database');
+      }
     }
 
     // Fetch from database with filters
