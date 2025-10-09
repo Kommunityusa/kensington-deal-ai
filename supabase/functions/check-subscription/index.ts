@@ -74,7 +74,12 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      
+      // Safely handle the subscription end date
+      if (subscription.current_period_end) {
+        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+      }
+      
       logStep("Active subscription found", { subscriptionId: subscription.id, endDate: subscriptionEnd });
       
       // Update profile with premium status
