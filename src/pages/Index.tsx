@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingPropertyCard from "@/components/LandingPropertyCard";
+import { JumpstartApplicationForm } from "@/components/JumpstartApplicationForm";
 
 const Index = () => {
   const [properties, setProperties] = useState<any[]>([]);
@@ -117,13 +119,29 @@ const Index = () => {
           <p className="text-muted-foreground text-lg">Start free or unlock premium features</p>
           <div className="mt-6 space-y-3">
             <Badge variant="secondary" className="text-base px-4 py-2">
-              🎓 Free forever for Jumpstart Kensington Graduates
+              🎓 Free forever for Jumpstart Philly Graduates
             </Badge>
             <Card className="max-w-2xl mx-auto bg-muted/50">
               <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground mb-3">
-                  <strong>Jumpstart Kensington Graduates:</strong> Contact us to receive your exclusive coupon code for lifetime free access to the premium plan.
+                <p className="text-sm text-muted-foreground mb-4">
+                  <strong>Jumpstart Philly Graduates:</strong> Apply below to receive your exclusive coupon code for lifetime free access to the premium plan.
                 </p>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      Apply for Free Access
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Jumpstart Philly Graduate Application</DialogTitle>
+                      <DialogDescription>
+                        Fill out this form to receive your lifetime free access coupon code.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <JumpstartApplicationForm />
+                  </DialogContent>
+                </Dialog>
               </CardContent>
             </Card>
           </div>

@@ -50,6 +50,30 @@ export type Database = {
           },
         ]
       }
+      jumpstart_applications: {
+        Row: {
+          created_at: string
+          email: string
+          graduation_date: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          graduation_date: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          graduation_date?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
