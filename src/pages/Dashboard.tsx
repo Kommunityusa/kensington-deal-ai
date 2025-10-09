@@ -184,6 +184,15 @@ export default function Dashboard() {
           </Card>
         )}
 
+
+        <Card className="mb-6 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+          <CardContent className="py-4">
+            <p className="text-sm text-amber-900 dark:text-amber-200">
+              <strong>⚠️ Important Disclaimer:</strong> Property data may be outdated and should be independently verified. We do not endorse any specific deals or transactions. All users must conduct their own due diligence before making any investment decisions. This information is provided for educational purposes only and does not constitute financial, legal, or investment advice.
+            </p>
+          </CardContent>
+        </Card>
+
         <PropertyFilters filters={filters} setFilters={setFilters} />
 
         {isLoading ? (
