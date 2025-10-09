@@ -374,12 +374,19 @@ export default function PropertyDetails() {
             </Alert>
 
             <div className="pt-4">
-              <Button size="lg" className="w-full" asChild>
-                <a href={property.listing_url || '#'} target="_blank" rel="noopener noreferrer">
+              {property.listing_url ? (
+                <Button size="lg" className="w-full" asChild>
+                  <a href={property.listing_url} target="_blank" rel="noopener noreferrer">
+                    <DollarSign className="h-5 w-5 mr-2" />
+                    View Property
+                  </a>
+                </Button>
+              ) : (
+                <Button size="lg" className="w-full" disabled>
                   <DollarSign className="h-5 w-5 mr-2" />
-                  View Property
-                </a>
-              </Button>
+                  Listing URL Not Available
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
