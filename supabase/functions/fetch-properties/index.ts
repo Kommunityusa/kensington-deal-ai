@@ -25,278 +25,205 @@ serve(async (req) => {
 
     const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
     
-    // Try to fetch from external APIs first
+    // Try to fetch from external APIs in parallel
     if (RAPIDAPI_KEY) {
-      // Try Realty-in-US API first
-      try {
-        console.log('Attempting Realty-in-US API fetch');
-        
-        const requestBody: any = {
-          limit: 50,
-          offset: 0,
-          city: "Philadelphia",
-          state_code: "PA",
-          postal_code: "19125,19134",
-          status: ["for_sale"],
-          sort: {
-            direction: "desc",
-            field: "list_date"
-          }
-        };
+      console.log('Fetching from all APIs simultaneously');
+      
+      const allProperties: any[] = [];
 
-        if (filters?.minPrice) {
-          requestBody.price_min = filters.minPrice;
-        }
-        if (filters?.maxPrice) {
-          requestBody.price_max = filters.maxPrice;
-        }
-
-        const response = await fetch('https://realty-in-us.p.rapidapi.com/properties/v3/list', {
+      // Fetch from all APIs in parallel
+      const apiPromises = [
+        // Realty-in-US API
+        fetch('https://realty-in-us.p.rapidapi.com/properties/v3/list', {
           method: 'POST',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
             'x-rapidapi-host': 'realty-in-us.p.rapidapi.com',
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(requestBody)
-        });
+          body: JSON.stringify({
+            limit: 50,
+            offset: 0,
+            city: "Philadelphia",
+            state_code: "PA",
+            postal_code: "19125,19134",
+            status: ["for_sale"],
+            sort: { direction: "desc", field: "list_date" },
+            ...(filters?.minPrice && { price_min: filters.minPrice }),
+            ...(filters?.maxPrice && { price_max: filters.maxPrice })
+          })
+        }).then(res => res.ok ? res.json() : null).catch(() => null),
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Realty-in-US API Response successful');
-          console.log('Realty-in-US response structure:', JSON.stringify(data).substring(0, 500));
+        // LoopNet API for zip 19125
+        fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
+          method: 'POST',
+          headers: {
+            'x-rapidapi-key': RAPIDAPI_KEY,
+            'x-rapidapi-host': 'loopnet-api.p.rapidapi.com',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ zipCodeId: '19125', page: 1 })
+        }).then(res => res.ok ? res.json() : null).catch(() => null),
 
-          const properties = (data.data?.home_search?.results || []).map((prop: any) => {
-            const addressObj = prop.location?.address || {};
-            const addressLine = addressObj.line || 
-              `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
-              'Address not available';
-            
-            return {
-              id: prop.property_id || prop.listing_id || Math.random().toString(),
-              address: addressLine,
-              city: addressObj.city || 'Philadelphia',
-              state: addressObj.state_code || addressObj.state || 'PA',
-              zip_code: addressObj.postal_code || '',
-              price: prop.list_price || 0,
-              bedrooms: prop.description?.beds || 0,
-              bathrooms: prop.description?.baths_full || prop.description?.baths || 0,
-              square_feet: prop.description?.sqft || 0,
-              property_type: prop.description?.type || 'Houses',
-              image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
-              listing_url: prop.href || '',
-              description: prop.description?.text || '',
-              year_built: prop.description?.year_built || null,
-              lot_size: prop.description?.lot_sqft || null,
-            };
-          });
+        // LoopNet API for zip 19134
+        fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
+          method: 'POST',
+          headers: {
+            'x-rapidapi-key': RAPIDAPI_KEY,
+            'x-rapidapi-host': 'loopnet-api.p.rapidapi.com',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ zipCodeId: '19134', page: 1 })
+        }).then(res => res.ok ? res.json() : null).catch(() => null),
 
-          console.log(`Transformed ${properties.length} properties from Realty-in-US API`);
-
-          // Only return if we got properties, otherwise fall back to Zillow
-          if (properties.length > 0) {
-            return new Response(JSON.stringify({ properties, source: 'realty-in-us' }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          } else {
-            console.log('Realty-in-US returned 0 properties, trying Zillow...');
-          }
-        } else {
-          console.warn('Realty-in-US API failed:', response.status, await response.text());
-        }
-      } catch (apiError) {
-        console.warn('Realty-in-US API error:', apiError);
-      }
-
-      // Try LoopNet API for commercial properties
-      try {
-        console.log('Attempting LoopNet API fetch');
-        
-        // Try both Kensington zip codes
-        const zipCodes = ['19125', '19134'];
-        let allLoopNetProperties: any[] = [];
-        
-        for (const zipCode of zipCodes) {
-          const loopNetResponse = await fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
-            method: 'POST',
-            headers: {
-              'x-rapidapi-key': RAPIDAPI_KEY,
-              'x-rapidapi-host': 'loopnet-api.p.rapidapi.com',
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              zipCodeId: zipCode,
-              page: 1
-            })
-          });
-
-          if (loopNetResponse.ok) {
-            const loopNetData = await loopNetResponse.json();
-            console.log(`LoopNet API Response successful for ${zipCode}:`, JSON.stringify(loopNetData).substring(0, 300));
-            
-            const properties = (loopNetData.data?.results || loopNetData.results || []).map((prop: any) => ({
-              id: prop.listingId || prop.id || Math.random().toString(),
-              address: prop.address?.street || prop.streetAddress || 'Address not available',
-              city: prop.address?.city || 'Philadelphia',
-              state: prop.address?.state || 'PA',
-              zip_code: prop.address?.zipCode || zipCode,
-              price: prop.listPrice || prop.price || 0,
-              bedrooms: 0,
-              bathrooms: 0,
-              square_feet: prop.buildingSize || prop.squareFeet || 0,
-              property_type: prop.propertyType || 'Commercial',
-              image_url: prop.primaryPhoto?.url || prop.imageUrl || '',
-              listing_url: prop.listingUrl || '',
-              description: prop.description || '',
-              year_built: prop.yearBuilt || null,
-              lot_size: prop.lotSize || null,
-            }));
-            
-            allLoopNetProperties = allLoopNetProperties.concat(properties);
-          }
-        }
-
-        console.log(`Transformed ${allLoopNetProperties.length} properties from LoopNet API`);
-
-        if (allLoopNetProperties.length > 0) {
-          return new Response(JSON.stringify({ properties: allLoopNetProperties.slice(0, 50), source: 'loopnet' }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
-        } else {
-          console.log('LoopNet returned 0 properties, trying Zillow...');
-        }
-      } catch (loopNetError) {
-        console.warn('LoopNet API error:', loopNetError);
-      }
-
-      try {
-        console.log('Attempting Zillow API fetch');
-        
-        const zillowParams = new URLSearchParams({
-          location: 'Kensington, Philadelphia, PA',
-          status_type: 'ForSale',
-          home_type: 'Houses'
-        });
-
-        if (filters?.minPrice) {
-          zillowParams.append('price_min', filters.minPrice.toString());
-        }
-        if (filters?.maxPrice) {
-          zillowParams.append('price_max', filters.maxPrice.toString());
-        }
-
-        const zillowUrl = `https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?${zillowParams.toString()}`;
-
-        const zillowResponse = await fetch(zillowUrl, {
+        // Zillow API
+        fetch(`https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?location=Kensington, Philadelphia, PA&status_type=ForSale&home_type=Houses${filters?.minPrice ? `&price_min=${filters.minPrice}` : ''}${filters?.maxPrice ? `&price_max=${filters.maxPrice}` : ''}`, {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
             'x-rapidapi-host': 'zillow-com1.p.rapidapi.com'
           }
-        });
+        }).then(res => res.ok ? res.json() : null).catch(() => null),
 
-        if (zillowResponse.ok) {
-          const zillowData = await zillowResponse.json();
-          console.log('Zillow API Response successful');
-          console.log('Zillow data structure:', JSON.stringify(zillowData).substring(0, 500));
-
-          // Zillow API may return data in different formats
-          const propertyList = zillowData.props || zillowData.results || zillowData.data || [];
-          
-          const properties = propertyList
-            .slice(0, 50)
-            .map((prop: any) => ({
-              id: prop.zpid?.toString() || prop.id?.toString() || Math.random().toString(),
-              address: prop.address || prop.streetAddress || 'Address not available',
-              city: prop.addressCity || prop.city || 'Philadelphia',
-              state: prop.addressState || prop.state || 'PA',
-              zip_code: prop.zipcode || prop.zip || prop.postalCode || '',
-              price: prop.price || prop.listPrice || 0,
-              bedrooms: prop.bedrooms || prop.beds || 0,
-              bathrooms: prop.bathrooms || prop.baths || 0,
-              square_feet: prop.livingArea || prop.sqft || prop.squareFeet || 0,
-              property_type: prop.propertyType || prop.homeType || 'Houses',
-              image_url: prop.imgSrc || prop.image || prop.photo || '',
-              listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : (prop.url || ''),
-              description: prop.description || '',
-              year_built: prop.yearBuilt || prop.year || null,
-              lot_size: prop.lotAreaValue || prop.lotSize || null,
-            }));
-
-          console.log(`Transformed ${properties.length} properties from Zillow API`);
-
-          if (properties.length > 0) {
-            return new Response(JSON.stringify({ properties, source: 'zillow' }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          } else {
-            console.log('Zillow returned 0 properties, falling back to database');
-          }
-        } else {
-          console.warn('Zillow API failed:', zillowResponse.status);
-        }
-      } catch (zillowError) {
-        console.warn('Zillow API error:', zillowError);
-      }
-
-      // Try Redfin API
-      try {
-        console.log('Attempting Redfin API fetch');
-        
-        const redfinUrl = 'https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Kensington, Philadelphia, PA';
-
-        const redfinResponse = await fetch(redfinUrl, {
+        // Redfin API
+        fetch('https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Kensington, Philadelphia, PA', {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
             'x-rapidapi-host': 'redfin-com-data.p.rapidapi.com'
           }
-        });
+        }).then(res => res.ok ? res.json() : null).catch(() => null)
+      ];
 
-        if (redfinResponse.ok) {
-          const redfinData = await redfinResponse.json();
-          console.log('Redfin API Response successful');
-          console.log('Redfin data structure:', JSON.stringify(redfinData).substring(0, 500));
+      const [realtyData, loopNet19125Data, loopNet19134Data, zillowData, redfinData] = await Promise.all(apiPromises);
 
-          const propertyList = redfinData.homes || redfinData.data || redfinData.results || [];
+      // Process Realty-in-US results
+      if (realtyData?.data?.home_search?.results) {
+        const realtyProperties = realtyData.data.home_search.results.map((prop: any) => {
+          const addressObj = prop.location?.address || {};
+          const addressLine = addressObj.line || 
+            `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
+            'Address not available';
           
-          const properties = propertyList
-            .slice(0, 50)
-            .map((prop: any) => ({
-              id: prop.propertyId?.toString() || prop.mlsId?.toString() || Math.random().toString(),
-              address: prop.streetLine?.value || prop.address || 'Address not available',
-              city: prop.city || 'Philadelphia',
-              state: prop.state || 'PA',
-              zip_code: prop.zip || prop.zipCode || '',
-              price: prop.price?.value || prop.listPrice || 0,
-              bedrooms: prop.beds || 0,
-              bathrooms: prop.baths || 0,
-              square_feet: prop.sqFt?.value || prop.sqft || 0,
-              property_type: prop.propertyType || 'Houses',
-              image_url: prop.photos?.[0]?.url || prop.photoUrl || '',
-              listing_url: prop.url || '',
-              description: prop.listingRemarks || '',
-              year_built: prop.yearBuilt || null,
-              lot_size: prop.lotSize?.value || null,
-            }));
-
-          console.log(`Transformed ${properties.length} properties from Redfin API`);
-
-          if (properties.length > 0) {
-            return new Response(JSON.stringify({ properties, source: 'redfin' }), {
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            });
-          } else {
-            console.log('Redfin returned 0 properties, falling back to database');
-          }
-        } else {
-          console.warn('Redfin API failed:', redfinResponse.status);
-        }
-      } catch (redfinError) {
-        console.warn('Redfin API error:', redfinError);
+          return {
+            id: `realty-${prop.property_id || prop.listing_id || Math.random()}`,
+            address: addressLine,
+            city: addressObj.city || 'Philadelphia',
+            state: addressObj.state_code || addressObj.state || 'PA',
+            zip_code: addressObj.postal_code || '',
+            price: prop.list_price || 0,
+            bedrooms: prop.description?.beds || 0,
+            bathrooms: prop.description?.baths_full || prop.description?.baths || 0,
+            square_feet: prop.description?.sqft || 0,
+            property_type: prop.description?.type || 'Houses',
+            image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
+            listing_url: prop.href || '',
+            description: prop.description?.text || '',
+            year_built: prop.description?.year_built || null,
+            lot_size: prop.description?.lot_sqft || null,
+            source: 'realty-in-us'
+          };
+        });
+        allProperties.push(...realtyProperties);
+        console.log(`Added ${realtyProperties.length} properties from Realty-in-US`);
       }
 
-      console.log('All APIs failed, falling back to database');
+      // Process LoopNet results
+      const loopNetResults = [
+        ...(loopNet19125Data?.data?.results || loopNet19125Data?.results || []),
+        ...(loopNet19134Data?.data?.results || loopNet19134Data?.results || [])
+      ];
+      
+      if (loopNetResults.length > 0) {
+        const loopNetProperties = loopNetResults.map((prop: any) => ({
+          id: `loopnet-${prop.listingId || prop.id || Math.random()}`,
+          address: prop.address?.street || prop.streetAddress || 'Address not available',
+          city: prop.address?.city || 'Philadelphia',
+          state: prop.address?.state || 'PA',
+          zip_code: prop.address?.zipCode || '',
+          price: prop.listPrice || prop.price || 0,
+          bedrooms: 0,
+          bathrooms: 0,
+          square_feet: prop.buildingSize || prop.squareFeet || 0,
+          property_type: prop.propertyType || 'Commercial',
+          image_url: prop.primaryPhoto?.url || prop.imageUrl || '',
+          listing_url: prop.listingUrl || '',
+          description: prop.description || '',
+          year_built: prop.yearBuilt || null,
+          lot_size: prop.lotSize || null,
+          source: 'loopnet'
+        }));
+        allProperties.push(...loopNetProperties);
+        console.log(`Added ${loopNetProperties.length} properties from LoopNet`);
+      }
+
+      // Process Zillow results
+      if (zillowData) {
+        const propertyList = zillowData.props || zillowData.results || zillowData.data || [];
+        const zillowProperties = propertyList.slice(0, 50).map((prop: any) => ({
+          id: `zillow-${prop.zpid || prop.id || Math.random()}`,
+          address: prop.address || prop.streetAddress || 'Address not available',
+          city: prop.addressCity || prop.city || 'Philadelphia',
+          state: prop.addressState || prop.state || 'PA',
+          zip_code: prop.zipcode || prop.zip || prop.postalCode || '',
+          price: prop.price || prop.listPrice || 0,
+          bedrooms: prop.bedrooms || prop.beds || 0,
+          bathrooms: prop.bathrooms || prop.baths || 0,
+          square_feet: prop.livingArea || prop.sqft || prop.squareFeet || 0,
+          property_type: prop.propertyType || prop.homeType || 'Houses',
+          image_url: prop.imgSrc || prop.image || prop.photo || '',
+          listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : (prop.url || ''),
+          description: prop.description || '',
+          year_built: prop.yearBuilt || prop.year || null,
+          lot_size: prop.lotAreaValue || prop.lotSize || null,
+          source: 'zillow'
+        }));
+        allProperties.push(...zillowProperties);
+        console.log(`Added ${zillowProperties.length} properties from Zillow`);
+      }
+
+      // Process Redfin results
+      if (redfinData) {
+        const propertyList = redfinData.homes || redfinData.data || redfinData.results || [];
+        const redfinProperties = propertyList.slice(0, 50).map((prop: any) => ({
+          id: `redfin-${prop.propertyId || prop.mlsId || Math.random()}`,
+          address: prop.streetLine?.value || prop.address || 'Address not available',
+          city: prop.city || 'Philadelphia',
+          state: prop.state || 'PA',
+          zip_code: prop.zip || prop.zipCode || '',
+          price: prop.price?.value || prop.listPrice || 0,
+          bedrooms: prop.beds || 0,
+          bathrooms: prop.baths || 0,
+          square_feet: prop.sqFt?.value || prop.sqft || 0,
+          property_type: prop.propertyType || 'Houses',
+          image_url: prop.photos?.[0]?.url || prop.photoUrl || '',
+          listing_url: prop.url || '',
+          description: prop.listingRemarks || '',
+          year_built: prop.yearBuilt || null,
+          lot_size: prop.lotSize?.value || null,
+          source: 'redfin'
+        }));
+        allProperties.push(...redfinProperties);
+        console.log(`Added ${redfinProperties.length} properties from Redfin`);
+      }
+
+      console.log(`Total properties from all APIs: ${allProperties.length}`);
+
+      // Return combined results if we got any properties
+      if (allProperties.length > 0) {
+        return new Response(JSON.stringify({ 
+          properties: allProperties.slice(0, 100), 
+          source: 'combined-apis',
+          breakdown: {
+            total: allProperties.length,
+            sources: ['realty-in-us', 'loopnet', 'zillow', 'redfin']
+          }
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      console.log('No properties from any API, falling back to database');
     } else {
       console.log('No RAPIDAPI_KEY configured, using database');
     }
