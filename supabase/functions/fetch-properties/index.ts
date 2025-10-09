@@ -27,37 +27,46 @@ serve(async (req) => {
     
     // Try to fetch from external APIs first
     if (RAPIDAPI_KEY) {
-      // Try Realty Base US API first
+      // Try Realty-in-US API first
       try {
-        const params = new URLSearchParams({
-          location: 'Kensington, Philadelphia, PA',
-          limit: '50',
-        });
+        console.log('Attempting Realty-in-US API fetch');
+        
+        const requestBody: any = {
+          limit: 50,
+          offset: 0,
+          city: "Philadelphia",
+          state_code: "PA",
+          postal_code: "19125,19134",
+          status: ["for_sale"],
+          sort: {
+            direction: "desc",
+            field: "list_date"
+          }
+        };
 
         if (filters?.minPrice) {
-          params.append('price_min', filters.minPrice.toString());
+          requestBody.price_min = filters.minPrice;
         }
         if (filters?.maxPrice) {
-          params.append('price_max', filters.maxPrice.toString());
+          requestBody.price_max = filters.maxPrice;
         }
 
-        const apiUrl = `https://realty-base-us.p.rapidapi.com/SearchForSale?${params.toString()}`;
-        console.log('Attempting Realty Base API fetch:', apiUrl);
-
-        const response = await fetch(apiUrl, {
-          method: 'GET',
+        const response = await fetch('https://realty-in-us.p.rapidapi.com/properties/v3/list', {
+          method: 'POST',
           headers: {
-            'X-RapidAPI-Key': RAPIDAPI_KEY,
-            'X-RapidAPI-Host': 'realty-base-us.p.rapidapi.com'
-          }
+            'x-rapidapi-key': RAPIDAPI_KEY,
+            'x-rapidapi-host': 'realty-in-us.p.rapidapi.com',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
         });
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Realty Base API Response successful');
+          console.log('Realty-in-US API Response successful');
 
-          const properties = (data.data || []).map((prop: any) => {
-            const addressObj = prop.location?.address || prop.address || {};
+          const properties = (data.data?.home_search?.results || []).map((prop: any) => {
+            const addressObj = prop.location?.address || {};
             const addressLine = addressObj.line || 
               `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
               'Address not available';
@@ -68,11 +77,11 @@ serve(async (req) => {
               city: addressObj.city || 'Philadelphia',
               state: addressObj.state_code || addressObj.state || 'PA',
               zip_code: addressObj.postal_code || '',
-              price: prop.list_price || prop.price || 0,
-              bedrooms: prop.description?.beds || prop.beds || 0,
-              bathrooms: prop.description?.baths_full || prop.description?.baths || prop.baths || 0,
-              square_feet: prop.description?.sqft || prop.description?.lot_sqft || 0,
-              property_type: prop.description?.type || prop.prop_type || 'townhomes',
+              price: prop.list_price || 0,
+              bedrooms: prop.description?.beds || 0,
+              bathrooms: prop.description?.baths_full || prop.description?.baths || 0,
+              square_feet: prop.description?.sqft || 0,
+              property_type: prop.description?.type || 'Houses',
               image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
               listing_url: prop.href || '',
               description: prop.description?.text || '',
@@ -81,16 +90,16 @@ serve(async (req) => {
             };
           });
 
-          console.log(`Transformed ${properties.length} properties from Realty Base API`);
+          console.log(`Transformed ${properties.length} properties from Realty-in-US API`);
 
-          return new Response(JSON.stringify({ properties, source: 'realty-base' }), {
+          return new Response(JSON.stringify({ properties, source: 'realty-in-us' }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         } else {
-          console.warn('Realty Base API failed:', response.status);
+          console.warn('Realty-in-US API failed:', response.status, await response.text());
         }
       } catch (apiError) {
-        console.warn('Realty Base API error:', apiError);
+        console.warn('Realty-in-US API error:', apiError);
       }
 
       // Try Zillow API as fallback
