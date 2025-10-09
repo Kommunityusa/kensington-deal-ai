@@ -115,9 +115,32 @@ const Index = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
           <p className="text-muted-foreground text-lg">Start free or unlock premium features</p>
-          <Badge variant="secondary" className="mt-4 text-base px-4 py-2">
-            🎓 Free forever for Jumpstart Kensington Graduates
-          </Badge>
+          <div className="mt-6 space-y-3">
+            <Badge variant="secondary" className="text-base px-4 py-2">
+              🎓 Free forever for Jumpstart Kensington Graduates
+            </Badge>
+            <Card className="max-w-2xl mx-auto bg-muted/50">
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground mb-3">
+                  <strong>Jumpstart Kensington Graduates:</strong> Get lifetime free access!
+                </p>
+                <ol className="text-sm text-left space-y-2 mb-3">
+                  <li className="flex items-start gap-2">
+                    <span className="font-semibold">1.</span>
+                    <span>Click "Get Premium Now" to start checkout</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="font-semibold">2.</span>
+                    <span>Enter coupon code: <code className="bg-background px-2 py-1 rounded font-mono">nkAAxjEU</code></span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="font-semibold">3.</span>
+                    <span>Enjoy 100% off forever - completely free!</span>
+                  </li>
+                </ol>
+              </CardContent>
+            </Card>
+          </div>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
