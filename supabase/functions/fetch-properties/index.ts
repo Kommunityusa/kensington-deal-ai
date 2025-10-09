@@ -40,18 +40,21 @@ serve(async (req) => {
       
       const allProperties: any[] = [];
 
-      // Fetch from all APIs in parallel
+      // Fetch from all APIs in parallel with increased limits
       const apiPromises = [
-        // Realtor16 API
-        fetch(`https://realtor16.p.rapidapi.com/search/forsale?location=philadelphia%2C%20pa&search_radius=10`, {
+        // Realtor16 API - increased search radius
+        fetch(`https://realtor16.p.rapidapi.com/search/forsale?location=philadelphia%2C%20pa&search_radius=20&limit=200`, {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
             'x-rapidapi-host': 'realtor16.p.rapidapi.com'
           }
-        }).then(res => res.ok ? res.json() : null).catch(() => null),
+        }).then(res => res.ok ? res.json() : null).catch(err => {
+          console.log('Realtor16 API error:', err.message);
+          return null;
+        }),
 
-        // Realty-in-US API
+        // Realty-in-US API - increased limit
         fetch('https://realty-in-us.p.rapidapi.com/properties/v3/list', {
           method: 'POST',
           headers: {
@@ -60,17 +63,20 @@ serve(async (req) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            limit: 50,
+            limit: 200,
             offset: 0,
             city: "Philadelphia",
             state_code: "PA",
-            postal_code: "19125,19134",
+            postal_code: "19125,19134,19122",
             status: ["for_sale"],
             sort: { direction: "desc", field: "list_date" },
             ...(filters?.minPrice && { price_min: filters.minPrice }),
             ...(filters?.maxPrice && { price_max: filters.maxPrice })
           })
-        }).then(res => res.ok ? res.json() : null).catch(() => null),
+        }).then(res => res.ok ? res.json() : null).catch(err => {
+          console.log('Realty-in-US API error:', err.message);
+          return null;
+        }),
 
         // LoopNet API for zip 19125
         fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
@@ -81,7 +87,10 @@ serve(async (req) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ zipCodeId: '19125', page: 1 })
-        }).then(res => res.ok ? res.json() : null).catch(() => null),
+        }).then(res => res.ok ? res.json() : null).catch(err => {
+          console.log('LoopNet 19125 API error:', err.message);
+          return null;
+        }),
 
         // LoopNet API for zip 19134
         fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
@@ -92,25 +101,34 @@ serve(async (req) => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ zipCodeId: '19134', page: 1 })
-        }).then(res => res.ok ? res.json() : null).catch(() => null),
+        }).then(res => res.ok ? res.json() : null).catch(err => {
+          console.log('LoopNet 19134 API error:', err.message);
+          return null;
+        }),
 
-        // Zillow API
-        fetch(`https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?location=Kensington, Philadelphia, PA&status_type=ForSale&home_type=Houses${filters?.minPrice ? `&price_min=${filters.minPrice}` : ''}${filters?.maxPrice ? `&price_max=${filters.maxPrice}` : ''}`, {
+        // Zillow API - expanded search
+        fetch(`https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?location=Philadelphia, PA 19125&status_type=ForSale&page=1${filters?.minPrice ? `&price_min=${filters.minPrice}` : ''}${filters?.maxPrice ? `&price_max=${filters.maxPrice}` : ''}`, {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
             'x-rapidapi-host': 'zillow-com1.p.rapidapi.com'
           }
-        }).then(res => res.ok ? res.json() : null).catch(() => null),
+        }).then(res => res.ok ? res.json() : null).catch(err => {
+          console.log('Zillow API error:', err.message);
+          return null;
+        }),
 
         // Redfin API
-        fetch('https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Kensington, Philadelphia, PA', {
+        fetch('https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Philadelphia, PA 19125&limit=100', {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
             'x-rapidapi-host': 'redfin-com-data.p.rapidapi.com'
           }
-        }).then(res => res.ok ? res.json() : null).catch(() => null)
+        }).then(res => res.ok ? res.json() : null).catch(err => {
+          console.log('Redfin API error:', err.message);
+          return null;
+        })
       ];
 
       const [realtor16Data, realtyData, loopNet19125Data, loopNet19134Data, zillowData, redfinData] = await Promise.all(apiPromises);
@@ -250,7 +268,7 @@ serve(async (req) => {
       if (zillowData) {
         const propertyList = zillowData.props || zillowData.results || zillowData.data || [];
         console.log(`Zillow returned ${propertyList.length} properties`);
-        const zillowProperties = propertyList.slice(0, 50).map((prop: any) => {
+        const zillowProperties = propertyList.map((prop: any) => {
           const externalId = `zillow-${prop.zpid || prop.id || Math.random()}`;
           fetchedIds.add(externalId);
           
@@ -285,7 +303,7 @@ serve(async (req) => {
       if (redfinData) {
         const propertyList = redfinData.homes || redfinData.data || redfinData.results || [];
         console.log(`Redfin returned ${propertyList.length} properties`);
-        const redfinProperties = propertyList.slice(0, 50).map((prop: any) => {
+        const redfinProperties = propertyList.map((prop: any) => {
           const externalId = `redfin-${prop.propertyId || prop.mlsId || Math.random()}`;
           fetchedIds.add(externalId);
           
