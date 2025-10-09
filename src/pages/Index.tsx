@@ -122,22 +122,8 @@ const Index = () => {
             <Card className="max-w-2xl mx-auto bg-muted/50">
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground mb-3">
-                  <strong>Jumpstart Kensington Graduates:</strong> Get lifetime free access!
+                  <strong>Jumpstart Kensington Graduates:</strong> Contact us to receive your exclusive coupon code for lifetime free access to the premium plan.
                 </p>
-                <ol className="text-sm text-left space-y-2 mb-3">
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold">1.</span>
-                    <span>Click "Get Premium Now" to start checkout</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold">2.</span>
-                    <span>Enter coupon code: <code className="bg-background px-2 py-1 rounded font-mono">nkAAxjEU</code></span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold">3.</span>
-                    <span>Enjoy 100% off forever - completely free!</span>
-                  </li>
-                </ol>
               </CardContent>
             </Card>
           </div>
