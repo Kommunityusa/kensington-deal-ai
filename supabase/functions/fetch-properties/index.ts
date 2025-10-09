@@ -209,14 +209,35 @@ serve(async (req) => {
 
       console.log(`Total properties from all APIs: ${allProperties.length}`);
 
+      // Deduplicate properties based on normalized address
+      const uniqueProperties = new Map();
+      
+      allProperties.forEach(property => {
+        // Normalize address for comparison (lowercase, remove spaces/punctuation)
+        const normalizedAddress = property.address
+          .toLowerCase()
+          .replace(/[.,\s-]/g, '');
+        
+        // Only add if we haven't seen this address before
+        if (!uniqueProperties.has(normalizedAddress)) {
+          uniqueProperties.set(normalizedAddress, property);
+        } else {
+          console.log(`Duplicate found and removed: ${property.address} from ${property.source}`);
+        }
+      });
+
+      const deduplicatedProperties = Array.from(uniqueProperties.values());
+      console.log(`Properties after deduplication: ${deduplicatedProperties.length} (removed ${allProperties.length - deduplicatedProperties.length} duplicates)`);
+
       // Return combined results if we got any properties
-      if (allProperties.length > 0) {
+      if (deduplicatedProperties.length > 0) {
         return new Response(JSON.stringify({ 
-          properties: allProperties.slice(0, 100), 
+          properties: deduplicatedProperties.slice(0, 100), 
           source: 'combined-apis',
           breakdown: {
-            total: allProperties.length,
-            sources: ['realty-in-us', 'loopnet', 'zillow', 'redfin']
+            total: deduplicatedProperties.length,
+            sources: ['realty-in-us', 'loopnet', 'zillow', 'redfin'],
+            duplicatesRemoved: allProperties.length - deduplicatedProperties.length
           }
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
