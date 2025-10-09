@@ -245,7 +245,7 @@ serve(async (req) => {
             price: prop.listPrice || prop.price || 0,
             bedrooms: 0,
             bathrooms: 0,
-            square_feet: prop.buildingSize || prop.squareFeet || 0,
+            square_feet: Math.floor(prop.buildingSize || prop.squareFeet || 0),
             property_type: prop.propertyType || 'Commercial',
             image_url: prop.primaryPhoto?.url || prop.imageUrl || '',
             listing_url: prop.listingUrl || '',
