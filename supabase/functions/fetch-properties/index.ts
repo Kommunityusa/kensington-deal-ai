@@ -128,11 +128,13 @@ serve(async (req) => {
       });
 
       // Process Realtor16 results
-      if (realtor16Data?.data?.home_search?.results) {
-        const realtor16Properties = realtor16Data.data.home_search.results.map((prop: any) => {
+      if (realtor16Data?.properties && Array.isArray(realtor16Data.properties)) {
+        console.log(`Realtor16 returned ${realtor16Data.properties.length} properties`);
+        const realtor16Properties = realtor16Data.properties.map((prop: any) => {
           const addressObj = prop.location?.address || {};
           const addressLine = addressObj.line || 
             `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
+            prop.location?.street_address ||
             'Address not available';
           
           const externalId = `realtor16-${prop.property_id || prop.listing_id || Math.random()}`;
@@ -141,19 +143,19 @@ serve(async (req) => {
           return {
             external_id: externalId,
             address: addressLine,
-            city: addressObj.city || 'Philadelphia',
-            state: addressObj.state_code || addressObj.state || 'PA',
-            zip_code: addressObj.postal_code || '',
-            price: prop.list_price || 0,
-            bedrooms: prop.description?.beds || 0,
-            bathrooms: prop.description?.baths_full || prop.description?.baths || 0,
-            square_feet: prop.description?.sqft || 0,
-            property_type: prop.description?.type || 'Houses',
-            image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
-            listing_url: prop.href || '',
-            description: prop.description?.text || '',
-            year_built: prop.description?.year_built || null,
-            lot_size: prop.description?.lot_sqft || null,
+            city: addressObj.city || prop.location?.city || 'Philadelphia',
+            state: addressObj.state_code || addressObj.state || prop.location?.state_code || 'PA',
+            zip_code: addressObj.postal_code || prop.location?.postal_code || '',
+            price: prop.list_price || prop.price || 0,
+            bedrooms: prop.description?.beds || prop.beds || 0,
+            bathrooms: prop.description?.baths_full || prop.description?.baths || prop.baths || 0,
+            square_feet: prop.description?.sqft || prop.sqft || 0,
+            property_type: prop.description?.type || prop.prop_type || 'Houses',
+            image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || prop.thumbnail || '',
+            listing_url: prop.href || prop.rdc_web_url || '',
+            description: prop.description?.text || prop.description || '',
+            year_built: prop.description?.year_built || prop.year_built || null,
+            lot_size: prop.description?.lot_sqft || prop.lot_sqft || null,
             source: 'realtor16',
             last_verified_at: new Date().toISOString(),
             is_active: true
