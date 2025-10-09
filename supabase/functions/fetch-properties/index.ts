@@ -207,7 +207,7 @@ serve(async (req) => {
             price: prop.list_price || 0,
             bedrooms: prop.description?.beds || 0,
             bathrooms: prop.description?.baths_full || prop.description?.baths || 0,
-            square_feet: prop.description?.sqft || 0,
+            square_feet: Math.floor(prop.description?.sqft || 0),
             property_type: prop.description?.type || 'Houses',
             image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
             listing_url: prop.href || '',
