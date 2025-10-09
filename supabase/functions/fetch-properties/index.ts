@@ -40,10 +40,10 @@ serve(async (req) => {
       
       const allProperties: any[] = [];
 
-      // Fetch from all APIs in parallel with increased limits
+      // Fetch from all APIs in parallel with 20 mile radius
       const apiPromises = [
-        // Realtor16 API - increased search radius
-        fetch(`https://realtor16.p.rapidapi.com/search/forsale?location=philadelphia%2C%20pa&search_radius=20&limit=200`, {
+        // Realtor16 API - 20 mile radius, multiple zip codes
+        fetch(`https://realtor16.p.rapidapi.com/search/forsale?location=19125%2C%20PA&search_radius=20&limit=200`, {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
@@ -54,7 +54,7 @@ serve(async (req) => {
           return null;
         }),
 
-        // Realty-in-US API - increased limit
+        // Realty-in-US API - expanded zip codes within 20 mile radius
         fetch('https://realty-in-us.p.rapidapi.com/properties/v3/list', {
           method: 'POST',
           headers: {
@@ -67,7 +67,7 @@ serve(async (req) => {
             offset: 0,
             city: "Philadelphia",
             state_code: "PA",
-            postal_code: "19125,19134,19122",
+            postal_code: "19125,19134,19122,19123,19133,19137,19124,19126",
             status: ["for_sale"],
             sort: { direction: "desc", field: "list_date" },
             ...(filters?.minPrice && { price_min: filters.minPrice }),
@@ -78,7 +78,7 @@ serve(async (req) => {
           return null;
         }),
 
-        // LoopNet API for zip 19125
+        // LoopNet API for zip 19125 + surrounding area
         fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
           method: 'POST',
           headers: {
@@ -86,13 +86,13 @@ serve(async (req) => {
             'x-rapidapi-host': 'loopnet-api.p.rapidapi.com',
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ zipCodeId: '19125', page: 1 })
+          body: JSON.stringify({ zipCodeId: '19125', page: 1, radius: 20 })
         }).then(res => res.ok ? res.json() : null).catch(err => {
           console.log('LoopNet 19125 API error:', err.message);
           return null;
         }),
 
-        // LoopNet API for zip 19134
+        // LoopNet API for zip 19134 + surrounding area
         fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
           method: 'POST',
           headers: {
@@ -100,14 +100,14 @@ serve(async (req) => {
             'x-rapidapi-host': 'loopnet-api.p.rapidapi.com',
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ zipCodeId: '19134', page: 1 })
+          body: JSON.stringify({ zipCodeId: '19134', page: 1, radius: 20 })
         }).then(res => res.ok ? res.json() : null).catch(err => {
           console.log('LoopNet 19134 API error:', err.message);
           return null;
         }),
 
-        // Zillow API - expanded search
-        fetch(`https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?location=Philadelphia, PA 19125&status_type=ForSale&page=1${filters?.minPrice ? `&price_min=${filters.minPrice}` : ''}${filters?.maxPrice ? `&price_max=${filters.maxPrice}` : ''}`, {
+        // Zillow API - expanded to cover 20 mile radius from both zip codes
+        fetch(`https://zillow-com1.p.rapidapi.com/propertyExtendedSearch?location=Philadelphia, PA&status_type=ForSale&page=1&resultsPerPage=200${filters?.minPrice ? `&price_min=${filters.minPrice}` : ''}${filters?.maxPrice ? `&price_max=${filters.maxPrice}` : ''}`, {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
@@ -118,8 +118,8 @@ serve(async (req) => {
           return null;
         }),
 
-        // Redfin API
-        fetch('https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Philadelphia, PA 19125&limit=100', {
+        // Redfin API - expanded to cover Philadelphia metro area
+        fetch('https://redfin-com-data.p.rapidapi.com/property/search-sale?location=Philadelphia, PA&radius=20&limit=200', {
           method: 'GET',
           headers: {
             'x-rapidapi-key': RAPIDAPI_KEY,
