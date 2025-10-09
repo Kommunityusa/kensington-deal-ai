@@ -115,12 +115,16 @@ export type Database = {
           city: string | null
           created_at: string | null
           description: string | null
+          external_id: string | null
           id: string
           image_url: string | null
+          is_active: boolean | null
+          last_verified_at: string | null
           listing_url: string | null
           lot_size: number | null
           price: number
           property_type: string | null
+          source: string | null
           square_feet: number | null
           state: string | null
           updated_at: string | null
@@ -134,12 +138,16 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           description?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
+          last_verified_at?: string | null
           listing_url?: string | null
           lot_size?: number | null
           price: number
           property_type?: string | null
+          source?: string | null
           square_feet?: number | null
           state?: string | null
           updated_at?: string | null
@@ -153,12 +161,16 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           description?: string | null
+          external_id?: string | null
           id?: string
           image_url?: string | null
+          is_active?: boolean | null
+          last_verified_at?: string | null
           listing_url?: string | null
           lot_size?: number | null
           price?: number
           property_type?: string | null
+          source?: string | null
           square_feet?: number | null
           state?: string | null
           updated_at?: string | null

@@ -17,13 +17,22 @@ serve(async (req) => {
     const { filters } = await req.json();
     console.log('Fetching properties with filters:', filters);
 
-    // Initialize Supabase client for fallback
+    // Initialize Supabase client
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     const RAPIDAPI_KEY = Deno.env.get('RAPIDAPI_KEY');
+    
+    // First, get existing properties from database to check what we already have
+    const { data: existingProperties } = await supabaseClient
+      .from('properties')
+      .select('external_id, id, last_verified_at')
+      .eq('is_active', true);
+
+    const existingIds = new Set(existingProperties?.map(p => p.external_id) || []);
+    console.log(`Found ${existingIds.size} existing active properties in database`);
     
     // Try to fetch from external APIs in parallel
     if (RAPIDAPI_KEY) {
@@ -97,6 +106,8 @@ serve(async (req) => {
 
       const [realtyData, loopNet19125Data, loopNet19134Data, zillowData, redfinData] = await Promise.all(apiPromises);
 
+      const fetchedIds = new Set<string>();
+
       // Process Realty-in-US results
       if (realtyData?.data?.home_search?.results) {
         const realtyProperties = realtyData.data.home_search.results.map((prop: any) => {
@@ -105,8 +116,11 @@ serve(async (req) => {
             `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
             'Address not available';
           
+          const externalId = `realty-${prop.property_id || prop.listing_id || Math.random()}`;
+          fetchedIds.add(externalId);
+          
           return {
-            id: `realty-${prop.property_id || prop.listing_id || Math.random()}`,
+            external_id: externalId,
             address: addressLine,
             city: addressObj.city || 'Philadelphia',
             state: addressObj.state_code || addressObj.state || 'PA',
@@ -121,7 +135,9 @@ serve(async (req) => {
             description: prop.description?.text || '',
             year_built: prop.description?.year_built || null,
             lot_size: prop.description?.lot_sqft || null,
-            source: 'realty-in-us'
+            source: 'realty-in-us',
+            last_verified_at: new Date().toISOString(),
+            is_active: true
           };
         });
         allProperties.push(...realtyProperties);
@@ -135,24 +151,31 @@ serve(async (req) => {
       ];
       
       if (loopNetResults.length > 0) {
-        const loopNetProperties = loopNetResults.map((prop: any) => ({
-          id: `loopnet-${prop.listingId || prop.id || Math.random()}`,
-          address: prop.address?.street || prop.streetAddress || 'Address not available',
-          city: prop.address?.city || 'Philadelphia',
-          state: prop.address?.state || 'PA',
-          zip_code: prop.address?.zipCode || '',
-          price: prop.listPrice || prop.price || 0,
-          bedrooms: 0,
-          bathrooms: 0,
-          square_feet: prop.buildingSize || prop.squareFeet || 0,
-          property_type: prop.propertyType || 'Commercial',
-          image_url: prop.primaryPhoto?.url || prop.imageUrl || '',
-          listing_url: prop.listingUrl || '',
-          description: prop.description || '',
-          year_built: prop.yearBuilt || null,
-          lot_size: prop.lotSize || null,
-          source: 'loopnet'
-        }));
+        const loopNetProperties = loopNetResults.map((prop: any) => {
+          const externalId = `loopnet-${prop.listingId || prop.id || Math.random()}`;
+          fetchedIds.add(externalId);
+          
+          return {
+            external_id: externalId,
+            address: prop.address?.street || prop.streetAddress || 'Address not available',
+            city: prop.address?.city || 'Philadelphia',
+            state: prop.address?.state || 'PA',
+            zip_code: prop.address?.zipCode || '',
+            price: prop.listPrice || prop.price || 0,
+            bedrooms: 0,
+            bathrooms: 0,
+            square_feet: prop.buildingSize || prop.squareFeet || 0,
+            property_type: prop.propertyType || 'Commercial',
+            image_url: prop.primaryPhoto?.url || prop.imageUrl || '',
+            listing_url: prop.listingUrl || '',
+            description: prop.description || '',
+            year_built: prop.yearBuilt || null,
+            lot_size: prop.lotSize || null,
+            source: 'loopnet',
+            last_verified_at: new Date().toISOString(),
+            is_active: true
+          };
+        });
         allProperties.push(...loopNetProperties);
         console.log(`Added ${loopNetProperties.length} properties from LoopNet`);
       }
@@ -160,24 +183,31 @@ serve(async (req) => {
       // Process Zillow results
       if (zillowData) {
         const propertyList = zillowData.props || zillowData.results || zillowData.data || [];
-        const zillowProperties = propertyList.slice(0, 50).map((prop: any) => ({
-          id: `zillow-${prop.zpid || prop.id || Math.random()}`,
-          address: prop.address || prop.streetAddress || 'Address not available',
-          city: prop.addressCity || prop.city || 'Philadelphia',
-          state: prop.addressState || prop.state || 'PA',
-          zip_code: prop.zipcode || prop.zip || prop.postalCode || '',
-          price: prop.price || prop.listPrice || 0,
-          bedrooms: prop.bedrooms || prop.beds || 0,
-          bathrooms: prop.bathrooms || prop.baths || 0,
-          square_feet: prop.livingArea || prop.sqft || prop.squareFeet || 0,
-          property_type: prop.propertyType || prop.homeType || 'Houses',
-          image_url: prop.imgSrc || prop.image || prop.photo || '',
-          listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : (prop.url || ''),
-          description: prop.description || '',
-          year_built: prop.yearBuilt || prop.year || null,
-          lot_size: prop.lotAreaValue || prop.lotSize || null,
-          source: 'zillow'
-        }));
+        const zillowProperties = propertyList.slice(0, 50).map((prop: any) => {
+          const externalId = `zillow-${prop.zpid || prop.id || Math.random()}`;
+          fetchedIds.add(externalId);
+          
+          return {
+            external_id: externalId,
+            address: prop.address || prop.streetAddress || 'Address not available',
+            city: prop.addressCity || prop.city || 'Philadelphia',
+            state: prop.addressState || prop.state || 'PA',
+            zip_code: prop.zipcode || prop.zip || prop.postalCode || '',
+            price: prop.price || prop.listPrice || 0,
+            bedrooms: prop.bedrooms || prop.beds || 0,
+            bathrooms: prop.bathrooms || prop.baths || 0,
+            square_feet: prop.livingArea || prop.sqft || prop.squareFeet || 0,
+            property_type: prop.propertyType || prop.homeType || 'Houses',
+            image_url: prop.imgSrc || prop.image || prop.photo || '',
+            listing_url: prop.detailUrl ? `https://www.zillow.com${prop.detailUrl}` : (prop.url || ''),
+            description: prop.description || '',
+            year_built: prop.yearBuilt || prop.year || null,
+            lot_size: prop.lotAreaValue || prop.lotSize || null,
+            source: 'zillow',
+            last_verified_at: new Date().toISOString(),
+            is_active: true
+          };
+        });
         allProperties.push(...zillowProperties);
         console.log(`Added ${zillowProperties.length} properties from Zillow`);
       }
@@ -185,24 +215,31 @@ serve(async (req) => {
       // Process Redfin results
       if (redfinData) {
         const propertyList = redfinData.homes || redfinData.data || redfinData.results || [];
-        const redfinProperties = propertyList.slice(0, 50).map((prop: any) => ({
-          id: `redfin-${prop.propertyId || prop.mlsId || Math.random()}`,
-          address: prop.streetLine?.value || prop.address || 'Address not available',
-          city: prop.city || 'Philadelphia',
-          state: prop.state || 'PA',
-          zip_code: prop.zip || prop.zipCode || '',
-          price: prop.price?.value || prop.listPrice || 0,
-          bedrooms: prop.beds || 0,
-          bathrooms: prop.baths || 0,
-          square_feet: prop.sqFt?.value || prop.sqft || 0,
-          property_type: prop.propertyType || 'Houses',
-          image_url: prop.photos?.[0]?.url || prop.photoUrl || '',
-          listing_url: prop.url || '',
-          description: prop.listingRemarks || '',
-          year_built: prop.yearBuilt || null,
-          lot_size: prop.lotSize?.value || null,
-          source: 'redfin'
-        }));
+        const redfinProperties = propertyList.slice(0, 50).map((prop: any) => {
+          const externalId = `redfin-${prop.propertyId || prop.mlsId || Math.random()}`;
+          fetchedIds.add(externalId);
+          
+          return {
+            external_id: externalId,
+            address: prop.streetLine?.value || prop.address || 'Address not available',
+            city: prop.city || 'Philadelphia',
+            state: prop.state || 'PA',
+            zip_code: prop.zip || prop.zipCode || '',
+            price: prop.price?.value || prop.listPrice || 0,
+            bedrooms: prop.beds || 0,
+            bathrooms: prop.baths || 0,
+            square_feet: prop.sqFt?.value || prop.sqft || 0,
+            property_type: prop.propertyType || 'Houses',
+            image_url: prop.photos?.[0]?.url || prop.photoUrl || '',
+            listing_url: prop.url || '',
+            description: prop.listingRemarks || '',
+            year_built: prop.yearBuilt || null,
+            lot_size: prop.lotSize?.value || null,
+            source: 'redfin',
+            last_verified_at: new Date().toISOString(),
+            is_active: true
+          };
+        });
         allProperties.push(...redfinProperties);
         console.log(`Added ${redfinProperties.length} properties from Redfin`);
       }
@@ -213,50 +250,79 @@ serve(async (req) => {
       const uniqueProperties = new Map();
       
       allProperties.forEach(property => {
-        // Normalize address for comparison (lowercase, remove spaces/punctuation)
         const normalizedAddress = property.address
           .toLowerCase()
           .replace(/[.,\s-]/g, '');
         
-        // Only add if we haven't seen this address before
         if (!uniqueProperties.has(normalizedAddress)) {
           uniqueProperties.set(normalizedAddress, property);
-        } else {
-          console.log(`Duplicate found and removed: ${property.address} from ${property.source}`);
         }
       });
 
       const deduplicatedProperties = Array.from(uniqueProperties.values());
-      console.log(`Properties after deduplication: ${deduplicatedProperties.length} (removed ${allProperties.length - deduplicatedProperties.length} duplicates)`);
+      console.log(`Properties after deduplication: ${deduplicatedProperties.length}`);
 
-      // Return combined results if we got any properties
-      if (deduplicatedProperties.length > 0) {
-        return new Response(JSON.stringify({ 
-          properties: deduplicatedProperties.slice(0, 100), 
-          source: 'combined-apis',
-          breakdown: {
-            total: deduplicatedProperties.length,
-            sources: ['realty-in-us', 'loopnet', 'zillow', 'redfin'],
-            duplicatesRemoved: allProperties.length - deduplicatedProperties.length
-          }
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+      // Separate new and existing properties
+      const newProperties = deduplicatedProperties.filter(p => !existingIds.has(p.external_id));
+      const existingToUpdate = deduplicatedProperties.filter(p => existingIds.has(p.external_id));
+
+      console.log(`New properties to insert: ${newProperties.length}`);
+      console.log(`Existing properties to update: ${existingToUpdate.length}`);
+
+      // Insert new properties
+      if (newProperties.length > 0) {
+        const { error: insertError } = await supabaseClient
+          .from('properties')
+          .insert(newProperties);
+        
+        if (insertError) {
+          console.error('Error inserting new properties:', insertError);
+        } else {
+          console.log(`Successfully inserted ${newProperties.length} new properties`);
+        }
       }
 
-      console.log('No properties from any API, falling back to database');
+      // Update last_verified_at for existing properties that are still active
+      if (existingToUpdate.length > 0) {
+        for (const prop of existingToUpdate) {
+          await supabaseClient
+            .from('properties')
+            .update({ 
+              last_verified_at: new Date().toISOString(),
+              price: prop.price // Update price in case it changed
+            })
+            .eq('external_id', prop.external_id);
+        }
+        console.log(`Updated ${existingToUpdate.length} existing properties`);
+      }
+
+      // Mark properties as inactive if they weren't found in the latest fetch
+      const staleIds = Array.from(existingIds).filter(id => !fetchedIds.has(id));
+      if (staleIds.length > 0) {
+        const { error: updateError } = await supabaseClient
+          .from('properties')
+          .update({ is_active: false })
+          .in('external_id', staleIds);
+        
+        if (updateError) {
+          console.error('Error marking stale properties:', updateError);
+        } else {
+          console.log(`Marked ${staleIds.length} properties as inactive`);
+        }
+      }
     } else {
-      console.log('No RAPIDAPI_KEY configured, using database');
+      console.log('No RAPIDAPI_KEY configured');
     }
 
-    // Fallback: Fetch from database
+    // Fetch from database with filters
     console.log('Fetching properties from database');
     let query = supabaseClient
       .from('properties')
       .select(`
         *,
         property_analysis(*)
-      `);
+      `)
+      .eq('is_active', true);
 
     // Apply filters
     if (filters?.minPrice) {
@@ -269,14 +335,16 @@ serve(async (req) => {
       query = query.eq('property_type', filters.propertyType);
     }
 
-    const { data: dbProperties, error } = await query.limit(50);
+    const { data: dbProperties, error } = await query
+      .order('last_verified_at', { ascending: false })
+      .limit(100);
 
     if (error) {
       console.error('Database error:', error);
       throw error;
     }
 
-    console.log(`Fetched ${dbProperties?.length || 0} properties from database`);
+    console.log(`Returning ${dbProperties?.length || 0} active properties from database`);
 
     return new Response(JSON.stringify({ 
       properties: dbProperties || [],
