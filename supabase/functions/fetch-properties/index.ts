@@ -108,7 +108,67 @@ serve(async (req) => {
         console.warn('Realty-in-US API error:', apiError);
       }
 
-      // Try Zillow API as fallback
+      // Try LoopNet API for commercial properties
+      try {
+        console.log('Attempting LoopNet API fetch');
+        
+        // Try both Kensington zip codes
+        const zipCodes = ['19125', '19134'];
+        let allLoopNetProperties: any[] = [];
+        
+        for (const zipCode of zipCodes) {
+          const loopNetResponse = await fetch('https://loopnet-api.p.rapidapi.com/loopnet/sale/searchByZipCode', {
+            method: 'POST',
+            headers: {
+              'x-rapidapi-key': RAPIDAPI_KEY,
+              'x-rapidapi-host': 'loopnet-api.p.rapidapi.com',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              zipCodeId: zipCode,
+              page: 1
+            })
+          });
+
+          if (loopNetResponse.ok) {
+            const loopNetData = await loopNetResponse.json();
+            console.log(`LoopNet API Response successful for ${zipCode}:`, JSON.stringify(loopNetData).substring(0, 300));
+            
+            const properties = (loopNetData.data?.results || loopNetData.results || []).map((prop: any) => ({
+              id: prop.listingId || prop.id || Math.random().toString(),
+              address: prop.address?.street || prop.streetAddress || 'Address not available',
+              city: prop.address?.city || 'Philadelphia',
+              state: prop.address?.state || 'PA',
+              zip_code: prop.address?.zipCode || zipCode,
+              price: prop.listPrice || prop.price || 0,
+              bedrooms: 0,
+              bathrooms: 0,
+              square_feet: prop.buildingSize || prop.squareFeet || 0,
+              property_type: prop.propertyType || 'Commercial',
+              image_url: prop.primaryPhoto?.url || prop.imageUrl || '',
+              listing_url: prop.listingUrl || '',
+              description: prop.description || '',
+              year_built: prop.yearBuilt || null,
+              lot_size: prop.lotSize || null,
+            }));
+            
+            allLoopNetProperties = allLoopNetProperties.concat(properties);
+          }
+        }
+
+        console.log(`Transformed ${allLoopNetProperties.length} properties from LoopNet API`);
+
+        if (allLoopNetProperties.length > 0) {
+          return new Response(JSON.stringify({ properties: allLoopNetProperties.slice(0, 50), source: 'loopnet' }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } else {
+          console.log('LoopNet returned 0 properties, trying Zillow...');
+        }
+      } catch (loopNetError) {
+        console.warn('LoopNet API error:', loopNetError);
+      }
+
       try {
         console.log('Attempting Zillow API fetch');
         
