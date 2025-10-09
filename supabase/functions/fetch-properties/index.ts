@@ -417,15 +417,23 @@ serve(async (req) => {
     console.log('Checking for duplicates in database...');
     const { data: allDbProperties } = await supabaseClient
       .from('properties')
-      .select('id, address, created_at')
+      .select('id, address, external_id, created_at')
       .eq('is_active', true)
       .order('created_at', { ascending: true });
 
     if (allDbProperties && allDbProperties.length > 0) {
-      const seenAddresses = new Map();
+      const seenAddresses = new Map<string, string>(); // Maps normalized address to first property ID
+      const seenExternalIds = new Set<string>();
       const duplicateIds: string[] = [];
 
       allDbProperties.forEach(prop => {
+        // Check for duplicate external_id (same listing from API)
+        if (prop.external_id && seenExternalIds.has(prop.external_id)) {
+          duplicateIds.push(prop.id);
+          return;
+        }
+        
+        // Normalize address for comparison
         const normalizedAddr = prop.address
           .toLowerCase()
           .replace(/[.,\s-]/g, '')
@@ -433,12 +441,20 @@ serve(async (req) => {
           .replace(/avenue/g, 'ave')
           .replace(/road/g, 'rd')
           .replace(/boulevard/g, 'blvd')
-          .replace(/drive/g, 'dr');
+          .replace(/drive/g, 'dr')
+          .replace(/north/g, 'n')
+          .replace(/south/g, 's')
+          .replace(/east/g, 'e')
+          .replace(/west/g, 'w');
 
+        // Only mark as duplicate if BOTH address matches AND it's not the first occurrence
         if (seenAddresses.has(normalizedAddr)) {
           duplicateIds.push(prop.id);
         } else {
           seenAddresses.set(normalizedAddr, prop.id);
+          if (prop.external_id) {
+            seenExternalIds.add(prop.external_id);
+          }
         }
       });
 
