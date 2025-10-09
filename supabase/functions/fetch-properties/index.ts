@@ -42,6 +42,15 @@ serve(async (req) => {
 
       // Fetch from all APIs in parallel
       const apiPromises = [
+        // Realtor16 API
+        fetch(`https://realtor16.p.rapidapi.com/search/forsale?location=philadelphia%2C%20pa&search_radius=10`, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-key': RAPIDAPI_KEY,
+            'x-rapidapi-host': 'realtor16.p.rapidapi.com'
+          }
+        }).then(res => res.ok ? res.json() : null).catch(() => null),
+
         // Realty-in-US API
         fetch('https://realty-in-us.p.rapidapi.com/properties/v3/list', {
           method: 'POST',
@@ -104,9 +113,45 @@ serve(async (req) => {
         }).then(res => res.ok ? res.json() : null).catch(() => null)
       ];
 
-      const [realtyData, loopNet19125Data, loopNet19134Data, zillowData, redfinData] = await Promise.all(apiPromises);
+      const [realtor16Data, realtyData, loopNet19125Data, loopNet19134Data, zillowData, redfinData] = await Promise.all(apiPromises);
 
       const fetchedIds = new Set<string>();
+
+      // Process Realtor16 results
+      if (realtor16Data?.data?.home_search?.results) {
+        const realtor16Properties = realtor16Data.data.home_search.results.map((prop: any) => {
+          const addressObj = prop.location?.address || {};
+          const addressLine = addressObj.line || 
+            `${addressObj.street_number || ''} ${addressObj.street_name || ''} ${addressObj.street_suffix || ''}`.trim() ||
+            'Address not available';
+          
+          const externalId = `realtor16-${prop.property_id || prop.listing_id || Math.random()}`;
+          fetchedIds.add(externalId);
+          
+          return {
+            external_id: externalId,
+            address: addressLine,
+            city: addressObj.city || 'Philadelphia',
+            state: addressObj.state_code || addressObj.state || 'PA',
+            zip_code: addressObj.postal_code || '',
+            price: prop.list_price || 0,
+            bedrooms: prop.description?.beds || 0,
+            bathrooms: prop.description?.baths_full || prop.description?.baths || 0,
+            square_feet: prop.description?.sqft || 0,
+            property_type: prop.description?.type || 'Houses',
+            image_url: prop.primary_photo?.href || prop.photos?.[0]?.href || '',
+            listing_url: prop.href || '',
+            description: prop.description?.text || '',
+            year_built: prop.description?.year_built || null,
+            lot_size: prop.description?.lot_sqft || null,
+            source: 'realtor16',
+            last_verified_at: new Date().toISOString(),
+            is_active: true
+          };
+        });
+        allProperties.push(...realtor16Properties);
+        console.log(`Added ${realtor16Properties.length} properties from Realtor16`);
+      }
 
       // Process Realty-in-US results
       if (realtyData?.data?.home_search?.results) {
