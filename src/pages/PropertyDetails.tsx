@@ -374,9 +374,11 @@ export default function PropertyDetails() {
             </Alert>
 
             <div className="flex gap-4 pt-4">
-              <Button size="lg" className="flex-1">
-                <DollarSign className="h-5 w-5 mr-2" />
-                Make an Offer
+              <Button size="lg" className="flex-1" asChild>
+                <a href={property.listing_url || '#'} target="_blank" rel="noopener noreferrer">
+                  <DollarSign className="h-5 w-5 mr-2" />
+                  View Property
+                </a>
               </Button>
               {property.listing_url && (
                 <Button size="lg" variant="outline" asChild className="flex-1">
