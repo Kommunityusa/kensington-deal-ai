@@ -455,8 +455,7 @@ serve(async (req) => {
     }
 
     const { data: dbProperties, error } = await query
-      .order('last_verified_at', { ascending: false })
-      .limit(100);
+      .order('last_verified_at', { ascending: false });
 
     if (error) {
       console.error('Database error:', error);
