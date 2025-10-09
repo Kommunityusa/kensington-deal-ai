@@ -373,20 +373,13 @@ export default function PropertyDetails() {
               </AlertDescription>
             </Alert>
 
-            <div className="flex gap-4 pt-4">
-              <Button size="lg" className="flex-1" asChild>
+            <div className="pt-4">
+              <Button size="lg" className="w-full" asChild>
                 <a href={property.listing_url || '#'} target="_blank" rel="noopener noreferrer">
                   <DollarSign className="h-5 w-5 mr-2" />
                   View Property
                 </a>
               </Button>
-              {property.listing_url && (
-                <Button size="lg" variant="outline" asChild className="flex-1">
-                  <a href={property.listing_url} target="_blank" rel="noopener noreferrer">
-                    View Original Listing
-                  </a>
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>
