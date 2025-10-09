@@ -48,7 +48,7 @@ serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      payment_method_types: ['card'], // Explicitly specify payment methods
+      payment_method_types: ['card'],
       line_items: [
         {
           price: "price_1SFtFnL9XuqLtazOsuV3VoBo",
@@ -56,6 +56,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      allow_promotion_codes: true, // Enable coupon code input
       success_url: `${origin}/dashboard?checkout=success`,
       cancel_url: `${origin}/dashboard?checkout=cancel`,
     });
