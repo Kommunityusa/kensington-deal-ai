@@ -64,6 +64,7 @@ serve(async (req) => {
         if (response.ok) {
           const data = await response.json();
           console.log('Realty-in-US API Response successful');
+          console.log('Realty-in-US response structure:', JSON.stringify(data).substring(0, 500));
 
           const properties = (data.data?.home_search?.results || []).map((prop: any) => {
             const addressObj = prop.location?.address || {};
@@ -92,9 +93,14 @@ serve(async (req) => {
 
           console.log(`Transformed ${properties.length} properties from Realty-in-US API`);
 
-          return new Response(JSON.stringify({ properties, source: 'realty-in-us' }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          });
+          // Only return if we got properties, otherwise fall back to Zillow
+          if (properties.length > 0) {
+            return new Response(JSON.stringify({ properties, source: 'realty-in-us' }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          } else {
+            console.log('Realty-in-US returned 0 properties, trying Zillow...');
+          }
         } else {
           console.warn('Realty-in-US API failed:', response.status, await response.text());
         }
