@@ -16,7 +16,10 @@ export default function Dashboard() {
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [properties, setProperties] = useState<any[]>([]);
+  const [totalProperties, setTotalProperties] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(12);
   const [filters, setFilters] = useState({
     minPrice: "",
     maxPrice: "",
@@ -57,13 +60,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (user) {
+      setCurrentPage(1); // Reset to page 1 when filters change
       fetchProperties();
     }
   }, [user, filters]);
 
+
+  // Fetch properties when page changes
+  useEffect(() => {
+    if (user && currentPage > 1) {
+      fetchProperties();
+    }
+  }, [currentPage]);
+
   const fetchProperties = async () => {
     setLoading(true);
-    console.log('Starting to fetch properties with filters:', filters);
+    console.log('Starting to fetch properties with filters:', filters, 'page:', currentPage);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-properties', {
         body: { 
@@ -71,7 +83,9 @@ export default function Dashboard() {
             minPrice: filters.minPrice ? parseInt(filters.minPrice) : undefined,
             maxPrice: filters.maxPrice ? parseInt(filters.maxPrice) : undefined,
             propertyType: filters.propertyType
-          }
+          },
+          page: currentPage,
+          limit: itemsPerPage
         }
       });
 
@@ -83,7 +97,10 @@ export default function Dashboard() {
         setProperties([]);
       } else {
         let propertiesList = data?.properties || [];
-        console.log(`Received ${propertiesList.length} properties`);
+        const total = data?.total || 0;
+        console.log(`Received ${propertiesList.length} properties out of ${total} total`);
+        
+        setTotalProperties(total);
         
         // Apply sorting
         if (filters.sortBy === "price-low") {
@@ -94,7 +111,7 @@ export default function Dashboard() {
         
         setProperties(propertiesList);
         if (propertiesList.length > 0) {
-          toast.success(`Loaded ${propertiesList.length} properties`);
+          toast.success(`Loaded ${propertiesList.length} properties (Page ${currentPage} of ${Math.ceil(total / itemsPerPage)})`);
         }
       }
     } catch (error) {
@@ -105,7 +122,15 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    fetchProperties();
+  };
+
+  const totalPages = Math.ceil(totalProperties / itemsPerPage);
   const displayedProperties = subscription.subscribed ? properties : properties.slice(0, 6);
+  const showPagination = subscription.subscribed && totalPages > 1;
 
   // Show loading state if either properties or subscription is still loading
   const isLoading = loading || subscription.loading;
@@ -201,11 +226,64 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
+            <div className="mb-4 text-sm text-muted-foreground">
+              {subscription.subscribed && (
+                <p>Showing {properties.length} of {totalProperties} properties (Page {currentPage} of {totalPages})</p>
+              )}
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedProperties.map((property) => (
                 <PropertyCard key={property.id} property={property} isPremium={subscription.subscribed} />
               ))}
             </div>
+            
+            {showPagination && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <Button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1 || loading}
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    
+                    return (
+                      <Button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        disabled={loading}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                
+                <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages || loading}
+                  variant="outline"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
             
             {!subscription.subscribed && properties.length > 6 && (
               <Card className="mt-8 bg-gradient-primary text-white border-0">

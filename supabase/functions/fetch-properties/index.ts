@@ -14,8 +14,10 @@ serve(async (req) => {
   }
 
   try {
-    const { filters } = await req.json();
-    console.log('Fetching properties with filters:', filters);
+    const { filters, page = 1, limit = 12 } = await req.json();
+    console.log('Fetching properties with filters:', filters, 'page:', page, 'limit:', limit);
+
+    const offset = (page - 1) * limit;
 
     // Initialize Supabase client
     const supabaseClient = createClient(
@@ -451,8 +453,29 @@ serve(async (req) => {
       }
     }
 
-    // Fetch from database with filters
+    // Fetch from database with filters and pagination
     console.log('Fetching properties from database');
+    
+    // First get total count
+    let countQuery = supabaseClient
+      .from('properties')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true);
+
+    // Apply filters to count query
+    if (filters?.minPrice) {
+      countQuery = countQuery.gte('price', filters.minPrice);
+    }
+    if (filters?.maxPrice) {
+      countQuery = countQuery.lte('price', filters.maxPrice);
+    }
+    if (filters?.propertyType && filters.propertyType !== 'all') {
+      countQuery = countQuery.eq('property_type', filters.propertyType);
+    }
+
+    const { count } = await countQuery;
+
+    // Then fetch paginated data
     let query = supabaseClient
       .from('properties')
       .select(`
@@ -473,17 +496,22 @@ serve(async (req) => {
     }
 
     const { data: dbProperties, error } = await query
-      .order('last_verified_at', { ascending: false });
+      .order('last_verified_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       console.error('Database error:', error);
       throw error;
     }
 
-    console.log(`Returning ${dbProperties?.length || 0} active properties from database`);
+    console.log(`Returning ${dbProperties?.length || 0} properties from database (total: ${count}, page: ${page})`);
 
     return new Response(JSON.stringify({ 
       properties: dbProperties || [],
+      total: count || 0,
+      page,
+      limit,
+      totalPages: Math.ceil((count || 0) / limit),
       source: 'database'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
