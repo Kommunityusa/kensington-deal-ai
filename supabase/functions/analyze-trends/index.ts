@@ -50,12 +50,12 @@ serve(async (req) => {
       `Title: ${a.title}\nSentiment: ${a.sentiment || 'N/A'} (${a.sentiment_score || 'N/A'})\nDescription: ${a.description || 'N/A'}`
     ).join('\n\n');
 
-    const prompt = `Analyze these Kensington real estate news articles. Provide exactly 3 ultra-brief insights (15 words or less each):
+    const prompt = `Analyze these Kensington real estate news articles. Provide exactly 3 concise, complete insights (20-25 words each):
 • Overall market sentiment and direction
-• Best investment opportunity right now
-• Primary concern or risk factor
+• Best investment opportunity right now  
+• Primary concern or risk to watch
 
-Keep each point under 15 words. Be specific and actionable.
+Each point must be a complete, readable sentence. Maximum 25 words per point.
 
 News Articles:
 ${articlesContext}`;

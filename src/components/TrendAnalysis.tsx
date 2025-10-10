@@ -91,15 +91,11 @@ export const TrendAnalysis = () => {
     );
   }
 
-  // Parse the 3 bullet points and truncate if needed
+  // Parse the 3 bullet points - no truncation, show full sentences
   const bulletPoints = trendData.analysis_text
     .split('\n')
     .filter(line => line.trim())
-    .map(line => {
-      const cleaned = line.replace(/^[•\-]\s*/, '').trim();
-      // Truncate to ~60 characters max for cleaner display
-      return cleaned.length > 60 ? cleaned.substring(0, 60) + '...' : cleaned;
-    })
+    .map(line => line.replace(/^[•\-]\s*/, '').trim())
     .slice(0, 3);
 
   const cards = [
@@ -153,7 +149,7 @@ export const TrendAnalysis = () => {
                   </div>
                   <h4 className="font-semibold text-sm">{card.title}</h4>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed min-h-[3rem]">
                   {card.content}
                 </p>
               </div>
