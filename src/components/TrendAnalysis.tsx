@@ -139,17 +139,17 @@ export const TrendAnalysis = () => {
           return (
             <Card 
               key={idx} 
-              className="relative overflow-hidden hover:shadow-md transition-all"
+              className="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50 group-hover:opacity-70 transition-opacity`} />
               <div className="relative p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className={`p-2.5 rounded-xl ${card.iconBg}`}>
+                  <div className={`p-2.5 rounded-xl ${card.iconBg} group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className={`h-5 w-5 ${card.iconColor}`} />
                   </div>
                   <h4 className="font-semibold text-sm">{card.title}</h4>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed min-h-[3rem]">
+                <p className="text-sm text-muted-foreground leading-relaxed min-h-[3rem] group-hover:text-foreground transition-colors">
                   {card.content}
                 </p>
               </div>
