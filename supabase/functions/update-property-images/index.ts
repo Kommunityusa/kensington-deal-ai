@@ -45,11 +45,11 @@ serve(async (req) => {
       let imageUrl = null;
 
       try {
-        // Use Firecrawl to search for property images
-        const searchQuery = `${fullAddress} property`;
-        console.log(`Searching for images for: ${searchQuery}`);
+        // Search for the property address to find listing pages
+        const searchQuery = `${fullAddress}`;
+        console.log(`Searching for: ${searchQuery}`);
         
-        const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/search', {
+        const searchResponse = await fetch('https://api.firecrawl.dev/v1/search', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
@@ -57,68 +57,60 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             query: searchQuery,
-            limit: 3,
+            limit: 1,
           }),
         });
 
-        if (firecrawlResponse.ok) {
-          const firecrawlData = await firecrawlResponse.json();
-          console.log(`Search response for ${fullAddress}:`, JSON.stringify(firecrawlData).substring(0, 300));
-          
-          // Try to get image from search results - check multiple possible image locations
-          if (firecrawlData.data && firecrawlData.data.length > 0) {
-            for (const result of firecrawlData.data) {
-              // Try multiple image sources
-              if (result.metadata?.ogImage) {
-                imageUrl = result.metadata.ogImage;
-                console.log(`Found OG image from search: ${imageUrl}`);
-                break;
-              } else if (result.metadata?.image) {
-                imageUrl = result.metadata.image;
-                console.log(`Found metadata image from search: ${imageUrl}`);
-                break;
-              } else if (result.image) {
-                imageUrl = result.image;
-                console.log(`Found direct image from search: ${imageUrl}`);
-                break;
-              }
-            }
-            
-            // If still no image, try to scrape the first result URL
-            if (!imageUrl && firecrawlData.data[0]?.url) {
-              try {
-                console.log(`Scraping URL for images: ${firecrawlData.data[0].url}`);
-                const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-                  method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    url: firecrawlData.data[0].url,
-                    formats: ['markdown'],
-                    onlyMainContent: false,
-                  }),
-                });
-                
-                if (scrapeResponse.ok) {
-                  const scrapeData = await scrapeResponse.json();
-                  if (scrapeData.data?.metadata?.ogImage) {
-                    imageUrl = scrapeData.data.metadata.ogImage;
-                    console.log(`Found image from scrape: ${imageUrl}`);
-                  }
-                }
-              } catch (scrapeError) {
-                console.error('Error scraping for images:', scrapeError);
-              }
-            }
-          }
-        } else {
-          const errorText = await firecrawlResponse.text();
-          console.error(`Firecrawl search failed with status ${firecrawlResponse.status}: ${errorText}`);
+        if (!searchResponse.ok) {
+          const errorText = await searchResponse.text();
+          console.error(`Search failed: ${errorText}`);
+          continue;
         }
+
+        const searchData = await searchResponse.json();
+        
+        if (!searchData.data || searchData.data.length === 0) {
+          console.log(`No search results for: ${property.address}`);
+          continue;
+        }
+
+        const firstResultUrl = searchData.data[0].url;
+        console.log(`Found listing: ${firstResultUrl}, scraping for image...`);
+
+        // Scrape the listing page to extract the property image
+        const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: firstResultUrl,
+            formats: ['markdown'],
+            onlyMainContent: false,
+          }),
+        });
+
+        if (!scrapeResponse.ok) {
+          const errorText = await scrapeResponse.text();
+          console.error(`Scrape failed: ${errorText}`);
+          continue;
+        }
+
+        const scrapeData = await scrapeResponse.json();
+        
+        // Extract image URL from scrape metadata
+        if (scrapeData.data?.metadata?.ogImage) {
+          imageUrl = scrapeData.data.metadata.ogImage;
+          console.log(`Extracted image: ${imageUrl}`);
+        } else {
+          console.log(`No image found in metadata for: ${property.address}`);
+          continue;
+        }
+
       } catch (searchError) {
-        console.error(`Error searching for ${fullAddress}:`, searchError);
+        console.error(`Error processing ${fullAddress}:`, searchError);
+        continue;
       }
 
       if (imageUrl) {
@@ -158,7 +150,7 @@ serve(async (req) => {
               
               if (!updateError) {
                 updated++;
-                console.log(`Stored and updated image for: ${property.address}`);
+                console.log(`Successfully updated image for: ${property.address}`);
               } else {
                 console.error(`Error updating ${property.address}:`, updateError);
               }
@@ -171,8 +163,6 @@ serve(async (req) => {
         } catch (downloadError) {
           console.error(`Error downloading/storing image for ${property.address}:`, downloadError);
         }
-      } else {
-        console.log(`No image found for: ${property.address}`);
       }
 
       // Rate limiting - 90 second delay to stay well under rate limits (< 1 request/min)
