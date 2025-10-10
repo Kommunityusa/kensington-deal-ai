@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 
 interface TrendData {
   analysis_text: string;
@@ -70,43 +70,81 @@ export const TrendAnalysis = () => {
 
   if (!trendData) {
     return (
-      <Card className="overflow-hidden border-primary/10">
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 md:px-6 py-3 border-b border-primary/10">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-primary" />
-            <h3 className="font-semibold text-sm md:text-base">Market Trends</h3>
-          </div>
-        </div>
-        <div className="p-4 md:p-6">
-          <p className="text-sm text-muted-foreground">
-            Analyzing latest market news...
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="overflow-hidden border-primary/10 hover:border-primary/30 transition-colors">
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 px-4 md:px-6 py-3 border-b border-primary/10">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          <h3 className="font-semibold text-sm md:text-base">Market Trends</h3>
-          <span className="ml-auto text-xs text-muted-foreground">
-            {trendData.sentiment_summary}
-          </span>
-        </div>
-      </div>
-      <div className="p-4 md:p-6">
-        <div className="space-y-2 text-sm md:text-base">
-          {trendData.analysis_text.split('\n').filter(line => line.trim()).map((line, idx) => (
-            <div key={idx} className="flex items-start gap-2">
-              <span className="text-primary mt-1">•</span>
-              <span className="flex-1 leading-relaxed">{line.replace(/^[•\-]\s*/, '')}</span>
-            </div>
+      <div className="space-y-3">
+        <h3 className="text-lg md:text-xl font-semibold mb-4">Market Trends</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="p-4 animate-pulse">
+              <div className="h-4 bg-muted rounded w-1/2 mb-3"></div>
+              <div className="h-3 bg-muted rounded w-full mb-2"></div>
+              <div className="h-3 bg-muted rounded w-3/4"></div>
+            </Card>
           ))}
         </div>
       </div>
-    </Card>
+    );
+  }
+
+  // Parse the 3 bullet points
+  const bulletPoints = trendData.analysis_text
+    .split('\n')
+    .filter(line => line.trim())
+    .map(line => line.replace(/^[•\-]\s*/, '').trim())
+    .slice(0, 3);
+
+  const cards = [
+    {
+      title: "Market Sentiment",
+      icon: TrendingUp,
+      content: bulletPoints[0] || "Analyzing market direction...",
+      color: "primary"
+    },
+    {
+      title: "Key Opportunity",
+      icon: TrendingUp,
+      content: bulletPoints[1] || "Identifying opportunities...",
+      color: "primary"
+    },
+    {
+      title: "Watch Out",
+      icon: AlertCircle,
+      content: bulletPoints[2] || "Assessing risks...",
+      color: "destructive"
+    }
+  ];
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-lg md:text-xl font-semibold">Market Trends</h3>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {trendData.sentiment_summary}
+        </span>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {cards.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <Card 
+              key={idx} 
+              className="p-4 hover:shadow-lg transition-all border-l-4"
+              style={{ borderLeftColor: card.color === 'destructive' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))' }}
+            >
+              <div className="flex items-start gap-3">
+                <div className={`p-2 rounded-lg ${card.color === 'destructive' ? 'bg-destructive/10' : 'bg-primary/10'} flex-shrink-0`}>
+                  <Icon className={`h-4 w-4 ${card.color === 'destructive' ? 'text-destructive' : 'text-primary'}`} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm mb-2">{card.title}</h4>
+                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                    {card.content}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 };
