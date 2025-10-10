@@ -130,7 +130,7 @@ export const TrendAnalysis = () => {
       <div className="flex items-center justify-between">
         <h3 className="text-xl md:text-2xl font-bold">Market Trends</h3>
         <Badge variant="secondary" className="text-xs">
-          {trendData.sentiment_summary}
+          Updated Daily
         </Badge>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
