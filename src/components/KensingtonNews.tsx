@@ -37,7 +37,31 @@ export const KensingtonNews = () => {
         return;
       }
 
-      if (data) {
+      // If database is empty, fetch from API to populate it
+      if (!data || data.length === 0) {
+        console.log('Database empty, fetching fresh news...');
+        const { data: apiData, error: apiError } = await supabase.functions.invoke('fetch-kensington-news');
+        
+        if (!apiError && apiData?.success) {
+          // Refetch from database after API call populated it
+          const { data: refreshedData } = await supabase
+            .from('news_articles')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(15);
+          
+          if (refreshedData) {
+            setArticles(refreshedData.map(article => ({
+              title: article.title,
+              url: article.url,
+              description: article.description || '',
+              source: article.source || '',
+              publishedAt: article.published_at || '',
+              imageUrl: article.image_url || '',
+            })));
+          }
+        }
+      } else {
         setArticles(data.map(article => ({
           title: article.title,
           url: article.url,
