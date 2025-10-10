@@ -25,13 +25,13 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Fetch only 5 properties at a time to respect Firecrawl free tier rate limits (50/min)
+    // Fetch only 2 properties at a time to respect strict Firecrawl rate limits
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
       .select('id, address, city, state, zip_code, image_url, listing_url')
       .eq('source', 'rentcast')
       .or('image_url.is.null,image_url.eq.')
-      .limit(5); // Process 5 at a time to stay well within rate limits
+      .limit(2); // Process only 2 properties per run
 
     if (fetchError) {
       throw fetchError;
@@ -99,8 +99,8 @@ serve(async (req) => {
         console.log(`No image found for: ${property.address}`);
       }
 
-      // Rate limiting - 12 second delay to ensure we stay under 5 requests/minute
-      await new Promise(resolve => setTimeout(resolve, 12000));
+      // Rate limiting - 90 second delay to stay well under rate limits (< 1 request/min)
+      await new Promise(resolve => setTimeout(resolve, 90000));
     }
 
     console.log(`Successfully updated ${updated} property images`);
