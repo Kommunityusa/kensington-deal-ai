@@ -81,8 +81,9 @@ serve(async (req) => {
               continue;
             }
 
-            // Use property-themed placeholder image
-            const imageUrl = `https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop&q=60`;
+            // Generate Google Street View image URL
+            const fullAddress = `${listing.addressLine1}, ${listing.city || 'Philadelphia'}, ${listing.state || 'PA'} ${listing.zipCode || zipCode}`;
+            const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(fullAddress)}&key=${GOOGLE_MAPS_API_KEY}`;
 
             // Map Rentcast data to our schema
             const property = {
