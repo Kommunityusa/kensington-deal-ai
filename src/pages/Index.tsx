@@ -7,6 +7,7 @@ import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown } 
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingPropertyCard from "@/components/LandingPropertyCard";
+import { TrendAnalysis } from "@/components/TrendAnalysis";
 
 const Index = () => {
   const [properties, setProperties] = useState<any[]>([]);
@@ -119,6 +120,11 @@ const Index = () => {
             <Link to="/auth">Sign Up to View All Properties</Link>
           </Button>
         </div>
+      </section>
+
+      {/* Trend Analysis Section */}
+      <section className="container mx-auto px-4 py-12">
+        <TrendAnalysis />
       </section>
 
       {/* Free Access Section */}

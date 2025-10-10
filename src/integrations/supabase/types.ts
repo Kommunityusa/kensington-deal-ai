@@ -318,6 +318,33 @@ export type Database = {
           },
         ]
       }
+      trend_analysis: {
+        Row: {
+          analysis_text: string
+          created_at: string
+          id: string
+          key_insights: Json | null
+          sentiment_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          analysis_text: string
+          created_at?: string
+          id?: string
+          key_insights?: Json | null
+          sentiment_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          analysis_text?: string
+          created_at?: string
+          id?: string
+          key_insights?: Json | null
+          sentiment_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
