@@ -87,8 +87,8 @@ export default function Auth() {
             <div className="flex justify-center mb-4">
               <Home className="h-12 w-12 text-primary" />
             </div>
-            <CardTitle className="text-2xl">PropertyFinder</CardTitle>
-            <CardDescription>Find your dream home today</CardDescription>
+            <CardTitle className="text-2xl">Kensington Deals</CardTitle>
+            <CardDescription>Find real estate deals in Kensington</CardDescription>
           </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin">
