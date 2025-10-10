@@ -25,12 +25,11 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Fetch all rentcast properties with missing or placeholder images
+    // Fetch all rentcast properties to update with fresh Google Street View images
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
       .select('id, address, city, state, zip_code, image_url')
-      .eq('source', 'rentcast')
-      .or('image_url.is.null,image_url.like.%unsplash%,image_url.like.%placeholder%');
+      .eq('source', 'rentcast');
 
     if (fetchError) {
       throw fetchError;
