@@ -25,12 +25,12 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Fetch all rentcast properties without images
+    // Fetch all rentcast properties without images (null or empty)
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
       .select('id, address, city, state, zip_code, image_url, listing_url')
       .eq('source', 'rentcast')
-      .is('image_url', null);
+      .or('image_url.is.null,image_url.eq.');
 
     if (fetchError) {
       throw fetchError;
@@ -44,9 +44,9 @@ serve(async (req) => {
       let imageUrl = null;
 
       // First try: If listing URL exists, scrape it
-      if (property.listing_url) {
+      if (property.listing_url && property.listing_url.trim() !== '') {
         try {
-          console.log(`Scraping listing URL for ${fullAddress}`);
+          console.log(`Scraping listing URL: ${property.listing_url} for ${fullAddress}`);
           const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
             method: 'POST',
             headers: {
@@ -62,15 +62,20 @@ serve(async (req) => {
 
           if (firecrawlResponse.ok) {
             const firecrawlData = await firecrawlResponse.json();
+            console.log(`Firecrawl response for ${fullAddress}:`, JSON.stringify(firecrawlData).substring(0, 200));
             
             if (firecrawlData.data?.metadata?.ogImage) {
               imageUrl = firecrawlData.data.metadata.ogImage;
+              console.log(`Found OG image: ${imageUrl}`);
             } else if (firecrawlData.data?.html) {
               const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
               if (imgMatch && imgMatch[1]) {
                 imageUrl = imgMatch[1];
+                console.log(`Found img tag: ${imageUrl}`);
               }
             }
+          } else {
+            console.error(`Firecrawl request failed with status ${firecrawlResponse.status}`);
           }
         } catch (urlError) {
           console.error(`Error scraping listing URL for ${fullAddress}:`, urlError);
