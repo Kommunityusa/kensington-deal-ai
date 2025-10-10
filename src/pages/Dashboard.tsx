@@ -89,25 +89,6 @@ export default function Dashboard() {
         }
         
         setProperties(propertiesList);
-        
-        // Check if properties are missing images and trigger update
-        const missingImages = propertiesList.some((p: any) => !p.image_url);
-        if (missingImages && currentPage === 1) {
-          console.log('Some properties missing images, triggering update-property-images function');
-          toast.info("Fetching property images...");
-          
-          // Trigger image update in background
-          supabase.functions.invoke('update-property-images').then(({ data: imageData, error: imageError }) => {
-            if (!imageError && imageData?.updated > 0) {
-              console.log(`Updated ${imageData.updated} property images`);
-              // Refetch properties after a delay to show updated images
-              setTimeout(() => {
-                fetchProperties();
-              }, 2000);
-            }
-          });
-        }
-        
         if (propertiesList.length > 0) {
           toast.success(`Loaded ${propertiesList.length} properties (Page ${currentPage} of ${Math.ceil(total / itemsPerPage)})`);
         }

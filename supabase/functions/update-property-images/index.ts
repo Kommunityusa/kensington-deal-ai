@@ -84,16 +84,54 @@ serve(async (req) => {
       }
 
       if (imageUrl) {
-        const { error: updateError } = await supabaseClient
-          .from('properties')
-          .update({ image_url: imageUrl })
-          .eq('id', property.id);
-
-        if (!updateError) {
-          updated++;
-          console.log(`Updated image for: ${property.address}`);
-        } else {
-          console.error(`Error updating ${property.address}:`, updateError);
+        try {
+          // Download the image
+          console.log(`Downloading image from: ${imageUrl}`);
+          const imageResponse = await fetch(imageUrl);
+          
+          if (imageResponse.ok) {
+            const imageBlob = await imageResponse.blob();
+            const arrayBuffer = await imageBlob.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+            
+            // Generate a unique filename
+            const fileExt = imageUrl.split('.').pop()?.split('?')[0] || 'jpg';
+            const fileName = `${property.id}.${fileExt}`;
+            
+            // Upload to Supabase Storage
+            const { data: uploadData, error: uploadError } = await supabaseClient.storage
+              .from('property-images')
+              .upload(fileName, uint8Array, {
+                contentType: imageBlob.type || 'image/jpeg',
+                upsert: true
+              });
+            
+            if (!uploadError && uploadData) {
+              // Get public URL
+              const { data: { publicUrl } } = supabaseClient.storage
+                .from('property-images')
+                .getPublicUrl(fileName);
+              
+              // Update property with Supabase Storage URL
+              const { error: updateError } = await supabaseClient
+                .from('properties')
+                .update({ image_url: publicUrl })
+                .eq('id', property.id);
+              
+              if (!updateError) {
+                updated++;
+                console.log(`Stored and updated image for: ${property.address}`);
+              } else {
+                console.error(`Error updating ${property.address}:`, updateError);
+              }
+            } else {
+              console.error(`Failed to upload image for ${property.address}:`, uploadError);
+            }
+          } else {
+            console.error(`Failed to download image from ${imageUrl}: ${imageResponse.status}`);
+          }
+        } catch (downloadError) {
+          console.error(`Error downloading/storing image for ${property.address}:`, downloadError);
         }
       } else {
         console.log(`No image found for: ${property.address}`);
