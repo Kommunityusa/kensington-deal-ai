@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting multi-source property scraping with Firecrawl');
+    console.log('Starting automated property scraping with Firecrawl');
 
     const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
     if (!FIRECRAWL_API_KEY) {
@@ -28,76 +28,139 @@ serve(async (req) => {
     // Kensington zip codes
     const kensingtonZips = ['19125', '19134', '19122', '19137'];
     
-    // Property listing sources to scrape
-    const sources = [
-      {
-        name: 'redfin',
-        urls: kensingtonZips.map(zip => `https://www.redfin.com/zipcode/${zip}`),
-      },
-      {
-        name: 'zillow',
-        urls: kensingtonZips.map(zip => `https://www.zillow.com/homes/${zip}_rb/`),
-      },
-      {
-        name: 'realtor',
-        urls: kensingtonZips.map(zip => `https://www.realtor.com/realestateandhomes-search/${zip}`),
-      },
-    ];
-
     let totalScraped = 0;
     let totalInserted = 0;
     const allProperties: any[] = [];
 
-    // Scrape each source
-    for (const source of sources) {
-      console.log(`Scraping ${source.name}...`);
-      
-      for (const url of source.urls) {
-        try {
-          console.log(`Scraping URL: ${url}`);
-          
-          const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              url: url,
+    // Use Firecrawl's search API to find real estate listings for Kensington
+    for (const zipCode of kensingtonZips) {
+      try {
+        console.log(`Searching for properties in ${zipCode} using Firecrawl search...`);
+        
+        // Use the search endpoint to find real estate listings
+        const searchResponse = await fetch('https://api.firecrawl.dev/v1/search', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: `real estate homes for sale ${zipCode} Philadelphia Kensington`,
+            limit: 10,
+            scrapeOptions: {
               formats: ['markdown', 'html'],
               onlyMainContent: true,
-              waitFor: 2000, // Wait for dynamic content to load
-            }),
-          });
+              waitFor: 2000,
+            }
+          }),
+        });
 
-          if (!response.ok) {
-            console.error(`Firecrawl error for ${url}:`, response.status);
-            continue;
-          }
-
-          const data = await response.json();
-          const properties = parsePropertyData(data, source.name);
-          
-          console.log(`Found ${properties.length} properties from ${source.name}`);
-          allProperties.push(...properties);
-          totalScraped += properties.length;
-
-          // Rate limiting
-          await new Promise(resolve => setTimeout(resolve, 2000));
-        } catch (error) {
-          console.error(`Error scraping ${url}:`, error);
+        if (!searchResponse.ok) {
+          console.error(`Firecrawl search error for ${zipCode}:`, searchResponse.status);
+          continue;
         }
+
+        const searchData = await searchResponse.json();
+        console.log(`Found ${searchData.data?.length || 0} search results for ${zipCode}`);
+
+        // Process each search result
+        if (searchData.data && Array.isArray(searchData.data)) {
+          for (const result of searchData.data) {
+            // Extract properties from the scraped content
+            const properties = extractPropertiesFromContent(result, zipCode);
+            allProperties.push(...properties);
+            totalScraped += properties.length;
+          }
+        }
+
+        // Rate limiting between searches
+        await new Promise(resolve => setTimeout(resolve, 3000));
+      } catch (error) {
+        console.error(`Error searching for ${zipCode}:`, error);
+      }
+    }
+
+    // Also try crawling specific real estate sites for Kensington
+    const targetSites = [
+      `https://www.zillow.com/homes/19125_rb/`,
+      `https://www.redfin.com/zipcode/19125`,
+    ];
+
+    for (const site of targetSites) {
+      try {
+        console.log(`Crawling ${site}...`);
+        
+        // Use map endpoint to get all URLs from the site
+        const mapResponse = await fetch('https://api.firecrawl.dev/v1/map', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            url: site,
+            search: 'property listing',
+            limit: 20,
+          }),
+        });
+
+        if (mapResponse.ok) {
+          const mapData = await mapResponse.json();
+          console.log(`Found ${mapData.data?.links?.length || 0} property URLs`);
+
+          // Scrape a sample of the found property pages
+          const propertyUrls = (mapData.data?.links || []).slice(0, 5);
+          
+          for (const url of propertyUrls) {
+            try {
+              const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  url: url,
+                  formats: ['markdown', 'html'],
+                  onlyMainContent: true,
+                  waitFor: 2000,
+                }),
+              });
+
+              if (scrapeResponse.ok) {
+                const scrapeData = await scrapeResponse.json();
+                const properties = extractPropertiesFromContent(scrapeData.data, null);
+                allProperties.push(...properties);
+                totalScraped += properties.length;
+              }
+
+              // Rate limiting between scrapes
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } catch (err) {
+              console.error(`Error scraping ${url}:`, err);
+            }
+          }
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      } catch (error) {
+        console.error(`Error crawling ${site}:`, error);
       }
     }
 
     // Insert properties into database
     for (const property of allProperties) {
       try {
+        // Validate required fields
+        if (!property.address || !property.price || property.price < 1000) {
+          continue;
+        }
+
         const { error } = await supabaseClient
           .from('properties')
           .upsert({
             external_id: property.externalId,
-            source: property.source,
+            source: property.source || 'firecrawl',
             address: property.address,
             city: property.city || 'Philadelphia',
             state: property.state || 'PA',
@@ -130,10 +193,9 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Scraped ${totalScraped} properties from multiple sources`,
+      message: `Scraped ${totalScraped} properties using Firecrawl`,
       totalScraped,
       totalInserted,
-      sources: sources.map(s => s.name),
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -150,14 +212,38 @@ serve(async (req) => {
   }
 });
 
-function parsePropertyData(firecrawlData: any, sourceName: string): any[] {
+function extractPropertiesFromContent(content: any, zipCode: string | null): any[] {
   const properties: any[] = [];
   
   try {
-    const html = firecrawlData.data?.html || '';
-    const markdown = firecrawlData.data?.markdown || '';
+    const html = content.html || '';
+    const markdown = content.markdown || '';
+    const metadata = content.metadata || {};
     
-    // Extract JSON-LD structured data (common across all real estate sites)
+    // Try to extract structured data from metadata first
+    if (metadata.ogImage || metadata.title) {
+      const priceMatch = metadata.title?.match(/\$[\d,]+/) || markdown.match(/\$[\d,]+/);
+      const addressMatch = metadata.title?.match(/\d+\s+[A-Z\s]+(?:ST|AVE|RD|BLVD|LN|DR)/i) || 
+                           markdown.match(/\d+\s+[A-Z\s]+(?:ST|AVE|RD|BLVD|LN|DR)/i);
+      
+      if (priceMatch && addressMatch) {
+        const price = parseInt(priceMatch[0].replace(/[$,]/g, ''));
+        if (price > 10000) {
+          properties.push({
+            externalId: `firecrawl-${addressMatch[0]}`.replace(/[^a-zA-Z0-9-]/g, '-'),
+            source: 'firecrawl',
+            address: addressMatch[0],
+            zipCode: zipCode,
+            price: price,
+            url: content.url || metadata.ogUrl,
+            imageUrl: metadata.ogImage,
+            description: metadata.description || metadata.ogDescription,
+          });
+        }
+      }
+    }
+
+    // Extract JSON-LD structured data
     const jsonLdMatches = html.match(/<script type="application\/ld\+json">(.*?)<\/script>/gs);
     
     if (jsonLdMatches) {
@@ -166,7 +252,6 @@ function parsePropertyData(firecrawlData: any, sourceName: string): any[] {
           const jsonContent = match.replace(/<script[^>]*>|<\/script>/g, '');
           const jsonData = JSON.parse(jsonContent);
           
-          // Handle different JSON-LD formats
           const listings = Array.isArray(jsonData) ? jsonData : [jsonData];
           
           listings.forEach((item: any) => {
@@ -178,21 +263,21 @@ function parsePropertyData(firecrawlData: any, sourceName: string): any[] {
                 ? item.address 
                 : item.address?.streetAddress || item.name;
               
-              if (address) {
+              if (address && item.offers?.price) {
                 properties.push({
-                  externalId: `${sourceName}-${item.url || address}`.replace(/[^a-zA-Z0-9-]/g, '-'),
-                  source: sourceName,
+                  externalId: `firecrawl-${address}`.replace(/[^a-zA-Z0-9-]/g, '-'),
+                  source: 'firecrawl',
                   address: address,
                   city: item.address?.addressLocality || 'Philadelphia',
                   state: item.address?.addressRegion || 'PA',
-                  zipCode: item.address?.postalCode,
+                  zipCode: item.address?.postalCode || zipCode,
                   price: parseFloat(item.offers?.price || item.price || 0),
                   beds: item.numberOfBedrooms || item.bedrooms,
                   baths: item.numberOfBathroomsTotal || item.bathrooms,
                   sqft: item.floorSize?.value || item.squareFeet,
                   propertyType: item.additionalType || 'SINGLE FAMILY',
                   imageUrl: Array.isArray(item.image) ? item.image[0] : item.image,
-                  url: item.url,
+                  url: item.url || content.url,
                   description: item.description,
                 });
               }
@@ -204,30 +289,30 @@ function parsePropertyData(firecrawlData: any, sourceName: string): any[] {
       });
     }
 
-    // Fallback: Try to parse from markdown for additional properties
+    // Fallback: Parse from markdown
     if (properties.length === 0 && markdown) {
-      // Look for price patterns like $XXX,XXX
-      const priceMatches = markdown.match(/\$[\d,]+/g);
-      const addressMatches = markdown.match(/\d+\s+[A-Z\s]+(?:ST|AVE|RD|BLVD|LN|DR)/gi);
+      const priceMatches = markdown.match(/\$[\d,]+/g) || [];
+      const addressMatches = markdown.match(/\d+\s+[A-Z\s]+(?:ST|AVE|RD|BLVD|LN|DR)/gi) || [];
       
-      if (priceMatches && addressMatches && priceMatches.length === addressMatches.length) {
-        for (let i = 0; i < Math.min(priceMatches.length, addressMatches.length); i++) {
-          const price = parseInt(priceMatches[i].replace(/[$,]/g, ''));
-          if (price > 10000) { // Reasonable property price filter
-            properties.push({
-              externalId: `${sourceName}-${addressMatches[i]}`.replace(/[^a-zA-Z0-9-]/g, '-'),
-              source: sourceName,
-              address: addressMatches[i],
-              price: price,
-            });
-          }
+      const minLength = Math.min(priceMatches.length, addressMatches.length);
+      for (let i = 0; i < minLength; i++) {
+        const price = parseInt(priceMatches[i].replace(/[$,]/g, ''));
+        if (price > 10000) {
+          properties.push({
+            externalId: `firecrawl-${addressMatches[i]}`.replace(/[^a-zA-Z0-9-]/g, '-'),
+            source: 'firecrawl',
+            address: addressMatches[i],
+            zipCode: zipCode,
+            price: price,
+            url: content.url,
+          });
         }
       }
     }
 
-    console.log(`Parsed ${properties.length} properties from ${sourceName}`);
+    console.log(`Extracted ${properties.length} properties from content`);
   } catch (error) {
-    console.error(`Error parsing ${sourceName} data:`, error);
+    console.error(`Error extracting properties:`, error);
   }
 
   return properties;
