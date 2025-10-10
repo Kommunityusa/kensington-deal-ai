@@ -58,27 +58,27 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Temporary: Trigger Redfin scraper once
+  // Trigger image scraper for Philadelphia properties
   useEffect(() => {
-    const triggerScraper = async () => {
+    const triggerImageScraper = async () => {
       try {
-        console.log('Triggering Redfin scraper...');
-        toast.info('Scraping Redfin properties...');
-        const { data, error } = await supabase.functions.invoke('scrape-redfin');
+        console.log('Triggering property image scraper...');
+        toast.info('Fetching property images from Google Street View...');
+        const { data, error } = await supabase.functions.invoke('scrape-property-images');
         if (error) {
-          console.error('Scraper error:', error);
-          toast.error('Scraper failed: ' + error.message);
+          console.error('Image scraper error:', error);
+          toast.error('Image scraper failed: ' + error.message);
         } else {
-          console.log('Scraper result:', data);
-          toast.success('Scraper completed: ' + (data?.message || 'Done'));
+          console.log('Image scraper result:', data);
+          toast.success(data?.message || 'Images updated successfully');
           fetchProperties();
         }
       } catch (err) {
-        console.error('Failed to trigger scraper:', err);
-        toast.error('Failed to trigger scraper');
+        console.error('Failed to trigger image scraper:', err);
+        toast.error('Failed to trigger image scraper');
       }
     };
-    triggerScraper();
+    triggerImageScraper();
   }, []);
 
   useEffect(() => {
