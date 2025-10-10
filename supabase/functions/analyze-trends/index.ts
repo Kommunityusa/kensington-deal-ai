@@ -50,12 +50,12 @@ serve(async (req) => {
       `Title: ${a.title}\nSentiment: ${a.sentiment || 'N/A'} (${a.sentiment_score || 'N/A'})\nDescription: ${a.description || 'N/A'}`
     ).join('\n\n');
 
-    const prompt = `Analyze the following recent news articles about the Kensington neighborhood in Philadelphia. Provide exactly 3 brief bullet points (each 10-15 words max):
-• Market sentiment and direction
-• Key opportunity for investors  
-• Main concern to watch
+    const prompt = `Analyze the following recent news articles about the Kensington neighborhood in Philadelphia. Provide exactly 3 VERY brief bullet points (each 5-8 words MAXIMUM):
+• Market sentiment (positive/negative/cautious with one key word)
+• Top opportunity (specific and actionable)
+• Main risk (one clear concern)
 
-Format as bullet points starting with •. Be concise and actionable.
+Be extremely concise. Maximum 8 words per bullet.
 
 News Articles:
 ${articlesContext}`;
