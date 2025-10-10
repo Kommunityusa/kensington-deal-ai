@@ -7,7 +7,6 @@ import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown } 
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingPropertyCard from "@/components/LandingPropertyCard";
-import { JumpstartApplicationForm } from "@/components/JumpstartApplicationForm";
 
 const Index = () => {
   const [properties, setProperties] = useState<any[]>([]);
@@ -127,34 +126,6 @@ const Index = () => {
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">100% Free Access</h2>
           <p className="text-muted-foreground text-lg">All features included - no credit card required</p>
-          <div className="mt-6 space-y-3">
-            <Badge variant="secondary" className="text-base px-4 py-2">
-              🎓 Special recognition for Jumpstart Philly Graduates
-            </Badge>
-            <Card className="max-w-2xl mx-auto bg-muted/50">
-              <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground mb-4">
-                  <strong>Jumpstart Philly Graduates:</strong> Apply below to be featured as a verified graduate in our community.
-                </p>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      Apply for Graduate Recognition
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Jumpstart Philly Graduate Application</DialogTitle>
-                      <DialogDescription>
-                        Fill out this form to receive your graduate recognition badge.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <JumpstartApplicationForm />
-                  </DialogContent>
-                </Dialog>
-              </CardContent>
-            </Card>
-          </div>
         </div>
         
         <Card className="max-w-2xl mx-auto hover-scale border-2 border-primary">
