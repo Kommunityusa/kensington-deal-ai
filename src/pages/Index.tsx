@@ -65,7 +65,7 @@ const Index = () => {
                 <Link to="/auth">Sign In</Link>
               </Button>
               <Button variant="default" asChild>
-                <Link to="/checkout">Get Started</Link>
+                <Link to="/auth">Get Started Free</Link>
               </Button>
             </div>
           </div>
@@ -122,31 +122,31 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Free Access Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Plan</h2>
-          <p className="text-muted-foreground text-lg">Start free or unlock premium features</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">100% Free Access</h2>
+          <p className="text-muted-foreground text-lg">All features included - no credit card required</p>
           <div className="mt-6 space-y-3">
             <Badge variant="secondary" className="text-base px-4 py-2">
-              🎓 Free forever for Jumpstart Philly Graduates
+              🎓 Special recognition for Jumpstart Philly Graduates
             </Badge>
             <Card className="max-w-2xl mx-auto bg-muted/50">
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground mb-4">
-                  <strong>Jumpstart Philly Graduates:</strong> Apply below to receive your exclusive coupon code for lifetime free access to the premium plan.
+                  <strong>Jumpstart Philly Graduates:</strong> Apply below to be featured as a verified graduate in our community.
                 </p>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
-                      Apply for Free Access
+                      Apply for Graduate Recognition
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle>Jumpstart Philly Graduate Application</DialogTitle>
                       <DialogDescription>
-                        Fill out this form to receive your lifetime free access coupon code.
+                        Fill out this form to receive your graduate recognition badge.
                       </DialogDescription>
                     </DialogHeader>
                     <JumpstartApplicationForm />
@@ -157,99 +157,53 @@ const Index = () => {
           </div>
         </div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Free Plan */}
-          <Card className="hover-scale">
-            <CardHeader>
-              <CardTitle className="text-2xl">Free</CardTitle>
-              <div className="mt-4">
-                <span className="text-4xl font-bold">$0</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-              <CardDescription className="mt-2">
-                Get started with basic property browsing
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span>Browse featured properties</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span>Basic property information</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span>Basic property analysis</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span>View property photos</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-muted-foreground/50 mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">Limited to 6 properties</span>
-                </li>
-              </ul>
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/auth">Sign Up Free</Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Premium Plan */}
-          <Card className="hover-scale border-2 border-primary relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-gradient-primary text-white px-3 py-1 text-sm font-semibold">
-              Popular
+        <Card className="max-w-2xl mx-auto hover-scale border-2 border-primary">
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl">Free Forever</CardTitle>
+            <div className="mt-4">
+              <span className="text-5xl font-bold">$0</span>
+              <span className="text-muted-foreground text-xl">/month</span>
             </div>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Crown className="h-6 w-6 text-primary" />
-                <CardTitle className="text-2xl">Premium</CardTitle>
-              </div>
-              <div className="mt-4">
-                <span className="text-4xl font-bold">$10</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-              <CardDescription className="mt-2">
-                Full access to all investment tools
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ul className="space-y-3">
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Unlimited property access</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Full ROI analysis & estimates</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Market data & comparable sales</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Property alerts & notifications</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Save favorite properties</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="font-medium">Export detailed reports</span>
-                </li>
-              </ul>
-              <Button variant="hero" className="w-full" asChild>
-                <Link to="/checkout">Get Premium Now</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+            <CardDescription className="mt-2 text-base">
+              Complete access to all investment tools and property data
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">Unlimited property access</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">Full ROI analysis & estimates</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">Market data & comparable sales</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">Property alerts & notifications</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">Save favorite properties</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">List your own properties</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                <span className="font-medium">Export detailed reports</span>
+              </li>
+            </ul>
+            <Button variant="hero" size="lg" className="w-full" asChild>
+              <Link to="/auth">Get Started Free</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </section>
 
       {/* Features Section */}
