@@ -29,7 +29,7 @@ serve(async (req) => {
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
       .select('id, address, city, state, zip_code')
-      .eq('source', 'philadelphia-opa')
+      .eq('source', 'philly-opa')
       .or('image_url.is.null,image_url.eq.')
       .limit(50); // Process 50 at a time
 
