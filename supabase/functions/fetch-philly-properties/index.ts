@@ -42,8 +42,11 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
+    // Kensington zip codes: 19125, 19134, 19122, 19137
+    const kensingtonZips = ['19125', '19134', '19122', '19137'];
+    
     // Fetch from Philadelphia's official Open Data API (Carto)
-    // This pulls recent sales and active properties from public records
+    // Filter for Kensington area only
     const phillyApiUrl = 'https://phl.carto.com/api/v2/sql?q=' + 
       encodeURIComponent(
         `SELECT 
@@ -69,7 +72,7 @@ serve(async (req) => {
           AND sale_date > (CURRENT_DATE - INTERVAL '2 years')
           AND market_value > 50000
           AND total_livable_area > 0
-          AND zip_code IS NOT NULL
+          AND zip_code IN ('19125', '19134', '19122', '19137')
         ORDER BY sale_date DESC 
         LIMIT 500`
       ) + '&format=json';

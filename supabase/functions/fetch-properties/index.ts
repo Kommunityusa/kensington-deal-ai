@@ -26,13 +26,17 @@ serve(async (req) => {
     );
 
     // Fetch from database with filters and pagination
+    // Only show Kensington area properties (zip codes: 19125, 19134, 19122, 19137)
     console.log('Fetching properties from database');
+    
+    const kensingtonZips = ['19125', '19134', '19122', '19137'];
     
     // First get total count
     let countQuery = supabaseClient
       .from('properties')
       .select('*', { count: 'exact', head: true })
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .in('zip_code', kensingtonZips);
 
     // Apply filters to count query
     if (filters?.minPrice) {
@@ -54,7 +58,8 @@ serve(async (req) => {
         *,
         property_analysis(*)
       `)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .in('zip_code', kensingtonZips);
 
     // Apply filters
     if (filters?.minPrice) {
