@@ -5,7 +5,7 @@ import { User } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -101,6 +101,26 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const triggerFirecrawl = async () => {
+    toast.info("Starting Firecrawl scraper...");
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-multi-source-properties');
+      
+      if (error) {
+        console.error("Firecrawl error:", error);
+        toast.error("Failed to start scraper");
+      } else {
+        console.log("Firecrawl response:", data);
+        toast.success(`Scraper started! Found ${data?.totalScraped || 0} properties`);
+        // Refresh properties after scraping
+        setTimeout(() => fetchProperties(), 2000);
+      }
+    } catch (error) {
+      console.error("Error triggering Firecrawl:", error);
+      toast.error("Failed to start scraper");
+    }
+  };
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -133,6 +153,15 @@ export default function Dashboard() {
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
+                </Button>
+                <Button
+                  onClick={triggerFirecrawl}
+                  variant="default"
+                  size="sm"
+                  disabled={loading}
+                >
+                  <Globe className="h-4 w-4 mr-2" />
+                  Scrape New Listings
                 </Button>
               </div>
               <p className="text-muted-foreground">Free property listings for Philadelphia&apos;s Kensington neighborhood</p>
