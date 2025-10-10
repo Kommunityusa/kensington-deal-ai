@@ -110,50 +110,99 @@ serve(async (req) => {
               .select()
               .single();
 
-            if (!error && insertedProperty && listing.url) {
+            if (!error && insertedProperty) {
               totalInserted++;
               console.log(`Inserted property: ${property.address}`);
               
-              // Fetch image in background (without await)
+              // Fetch image in background using address search
               (async () => {
                 try {
-                  console.log(`Background: Fetching image for ${listing.url}`);
-                  const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-                    method: 'POST',
-                    headers: {
-                      'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      url: listing.url,
-                      formats: ['markdown', 'html'],
-                      onlyMainContent: true,
-                    }),
-                  });
+                  const fullAddress = `${property.address}, ${property.city}, ${property.state} ${property.zip_code}`;
+                  let imageUrl = null;
+                  
+                  // First try: If listing URL exists, scrape it
+                  if (listing.url) {
+                    console.log(`Background: Scraping listing URL for ${fullAddress}`);
+                    try {
+                      const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          url: listing.url,
+                          formats: ['markdown', 'html'],
+                          onlyMainContent: true,
+                        }),
+                      });
 
-                  if (firecrawlResponse.ok) {
-                    const firecrawlData = await firecrawlResponse.json();
-                    let imageUrl = null;
-                    
-                    if (firecrawlData.data?.metadata?.ogImage) {
-                      imageUrl = firecrawlData.data.metadata.ogImage;
-                    } else if (firecrawlData.data?.html) {
-                      const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-                      if (imgMatch && imgMatch[1]) {
-                        imageUrl = imgMatch[1];
+                      if (firecrawlResponse.ok) {
+                        const firecrawlData = await firecrawlResponse.json();
+                        
+                        if (firecrawlData.data?.metadata?.ogImage) {
+                          imageUrl = firecrawlData.data.metadata.ogImage;
+                        } else if (firecrawlData.data?.html) {
+                          const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+                          if (imgMatch && imgMatch[1]) {
+                            imageUrl = imgMatch[1];
+                          }
+                        }
                       }
-                    }
-                    
-                    if (imageUrl) {
-                      await supabaseClient
-                        .from('properties')
-                        .update({ image_url: imageUrl })
-                        .eq('id', insertedProperty.id);
-                      console.log(`Background: Updated image for ${property.address}`);
+                    } catch (urlError) {
+                      console.error(`Error scraping listing URL:`, urlError);
                     }
                   }
+                  
+                  // Second try: Search for property images using the address
+                  if (!imageUrl) {
+                    console.log(`Background: Searching for images of ${fullAddress}`);
+                    const searchQuery = encodeURIComponent(`${fullAddress} property for sale`);
+                    const searchUrl = `https://www.zillow.com/homes/${searchQuery}`;
+                    
+                    try {
+                      const searchResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                          url: searchUrl,
+                          formats: ['html'],
+                          onlyMainContent: false,
+                        }),
+                      });
+
+                      if (searchResponse.ok) {
+                        const searchData = await searchResponse.json();
+                        if (searchData.data?.html) {
+                          // Look for property images in search results
+                          const imgMatches = searchData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*alt=["'][^"']*property[^"']*["'][^>]*>/gi);
+                          if (imgMatches && imgMatches[0]) {
+                            const srcMatch = imgMatches[0].match(/src=["']([^"']+)["']/i);
+                            if (srcMatch && srcMatch[1]) {
+                              imageUrl = srcMatch[1];
+                            }
+                          }
+                        }
+                      }
+                    } catch (searchError) {
+                      console.error(`Error searching for property images:`, searchError);
+                    }
+                  }
+                  
+                  if (imageUrl) {
+                    await supabaseClient
+                      .from('properties')
+                      .update({ image_url: imageUrl })
+                      .eq('id', insertedProperty.id);
+                    console.log(`Background: Updated image for ${fullAddress}: ${imageUrl}`);
+                  } else {
+                    console.log(`Background: No image found for ${fullAddress}`);
+                  }
                 } catch (bgError) {
-                  console.error(`Background: Error fetching image for ${listing.url}:`, bgError);
+                  console.error(`Background: Error fetching image:`, bgError);
                 }
               })(); // Fire and forget
             } else if (error) {
