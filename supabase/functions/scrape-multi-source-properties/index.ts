@@ -66,6 +66,9 @@ serve(async (req) => {
           
           try {
             totalScraped++;
+            
+            // Log the listing structure to understand the data format
+            console.log('Rentcast listing sample:', JSON.stringify(listing).substring(0, 500));
 
             // Validate required fields
             if (!listing.addressLine1 || !listing.price || listing.price < 1000) {
@@ -85,7 +88,7 @@ serve(async (req) => {
               bathrooms: listing.bathrooms || null,
               square_feet: listing.squareFootage || null,
               property_type: listing.propertyType || 'Single Family',
-              image_url: listing.images?.[0] || null,
+              image_url: listing.photos?.[0] || listing.imageUrl || listing.image || `https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop`,
               listing_url: listing.url || null,
               description: listing.description || null,
               year_built: listing.yearBuilt || null,
