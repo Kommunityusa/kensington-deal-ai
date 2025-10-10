@@ -16,7 +16,28 @@ export const TrendAnalysis = () => {
 
   useEffect(() => {
     fetchTrendAnalysis();
+    // Try to trigger analysis if no data exists
+    triggerAnalysisIfNeeded();
   }, []);
+
+  const triggerAnalysisIfNeeded = async () => {
+    try {
+      // Check if we need to trigger analysis
+      const { data } = await supabase
+        .from('trend_analysis')
+        .select('id')
+        .limit(1);
+      
+      if (!data || data.length === 0) {
+        console.log('No trend data found, triggering analysis...');
+        await supabase.functions.invoke('analyze-trends');
+        // Wait a bit and refetch
+        setTimeout(() => fetchTrendAnalysis(), 3000);
+      }
+    } catch (error) {
+      console.error('Error checking/triggering analysis:', error);
+    }
+  };
 
   const fetchTrendAnalysis = async () => {
     try {
@@ -48,7 +69,24 @@ export const TrendAnalysis = () => {
   }
 
   if (!trendData) {
-    return null;
+    return (
+      <Card className="p-6 bg-gradient-to-br from-primary/5 to-background border-primary/20">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <TrendingUp className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">Market Trend Analysis</h3>
+            <p className="text-sm text-muted-foreground">
+              Generating analysis from recent news articles...
+            </p>
+          </div>
+        </div>
+        <div className="text-sm text-muted-foreground">
+          Our AI is analyzing the latest Kensington real estate news to provide you with market insights. This will be ready shortly.
+        </div>
+      </Card>
+    );
   }
 
   return (
