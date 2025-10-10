@@ -26,7 +26,7 @@ serve(async (req) => {
     );
 
     // Fetch from database with filters and pagination
-    // Only show Kensington area properties (zip codes: 19125, 19134, 19122, 19137)
+    // Only show Rentcast properties from Kensington area
     console.log('Fetching properties from database');
     
     const kensingtonZips = ['19125', '19134', '19122', '19137'];
@@ -36,6 +36,7 @@ serve(async (req) => {
       .from('properties')
       .select('*', { count: 'exact', head: true })
       .eq('is_active', true)
+      .eq('source', 'rentcast')
       .in('zip_code', kensingtonZips);
 
     // Apply filters to count query
@@ -59,6 +60,7 @@ serve(async (req) => {
         property_analysis(*)
       `)
       .eq('is_active', true)
+      .eq('source', 'rentcast')
       .in('zip_code', kensingtonZips);
 
     // Apply filters
@@ -89,7 +91,7 @@ serve(async (req) => {
       page,
       limit,
       totalPages: Math.ceil((count || 0) / limit),
-      source: 'philadelphia-opa'
+      source: 'rentcast'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
