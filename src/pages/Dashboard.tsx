@@ -122,30 +122,6 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const scrapeZillow = async () => {
-    setLoading(true);
-    toast.info("Starting Zillow scrape for Kensington...");
-    console.log('Triggering Zillow scrape');
-    try {
-      const { data, error } = await supabase.functions.invoke('scrape-zillow');
-
-      console.log('Zillow scrape response:', { data, error });
-
-      if (error) {
-        console.error("Error scraping Zillow:", error);
-        toast.error(`Failed to scrape Zillow: ${error.message}`);
-      } else {
-        toast.success(`✓ ${data.message || 'Zillow scraped successfully'} - ${data.propertiesInserted || 0} properties added`);
-        // Refresh the properties list
-        await fetchProperties();
-      }
-    } catch (error) {
-      console.error("Error calling scrape-zillow function:", error);
-      toast.error("Failed to scrape Zillow.");
-    }
-    setLoading(false);
-  };
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -168,29 +144,18 @@ export default function Dashboard() {
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-2">
                 <h1 className="text-4xl font-bold">Kensington Investment Opportunities</h1>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => {
-                      toast.info("Refreshing properties...");
-                      fetchProperties();
-                    }}
-                    variant="outline"
-                    size="sm"
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                  <Button
-                    onClick={scrapeZillow}
-                    variant="default"
-                    size="sm"
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Scrape Zillow Now
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => {
+                    toast.info("Refreshing properties...");
+                    fetchProperties();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </div>
               <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
