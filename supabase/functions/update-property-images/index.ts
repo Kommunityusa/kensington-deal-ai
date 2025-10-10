@@ -25,13 +25,13 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Fetch only 2 properties at a time to respect strict Firecrawl rate limits
+    // Fetch 2 properties at a time to use both concurrent browsers
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
       .select('id, address, city, state, zip_code, image_url, listing_url')
       .eq('source', 'rentcast')
       .or('image_url.is.null,image_url.eq.')
-      .limit(2); // Process only 2 properties per run
+      .limit(2);
 
     if (fetchError) {
       throw fetchError;
@@ -39,8 +39,8 @@ serve(async (req) => {
 
     console.log(`Found ${properties?.length || 0} properties to update`);
 
-    let updated = 0;
-    for (const property of properties || []) {
+    // Process properties in parallel using both concurrent browsers
+    const processProperty = async (property: any) => {
       const fullAddress = `${property.address}, ${property.city || 'Philadelphia'}, ${property.state || 'PA'} ${property.zip_code}`;
       let imageUrl = null;
 
@@ -64,14 +64,14 @@ serve(async (req) => {
         if (!searchResponse.ok) {
           const errorText = await searchResponse.text();
           console.error(`Search failed: ${errorText}`);
-          continue;
+          return 0;
         }
 
         const searchData = await searchResponse.json();
         
         if (!searchData.data || searchData.data.length === 0) {
           console.log(`No search results for: ${property.address}`);
-          continue;
+          return 0;
         }
 
         const firstResultUrl = searchData.data[0].url;
@@ -94,7 +94,7 @@ serve(async (req) => {
         if (!scrapeResponse.ok) {
           const errorText = await scrapeResponse.text();
           console.error(`Scrape failed: ${errorText}`);
-          continue;
+          return 0;
         }
 
         const scrapeData = await scrapeResponse.json();
@@ -105,12 +105,12 @@ serve(async (req) => {
           console.log(`Extracted image: ${imageUrl}`);
         } else {
           console.log(`No image found in metadata for: ${property.address}`);
-          continue;
+          return 0;
         }
 
       } catch (searchError) {
         console.error(`Error processing ${fullAddress}:`, searchError);
-        continue;
+        return 0;
       }
 
       if (imageUrl) {
@@ -149,8 +149,8 @@ serve(async (req) => {
                 .eq('id', property.id);
               
               if (!updateError) {
-                updated++;
                 console.log(`Successfully updated image for: ${property.address}`);
+                return 1;
               } else {
                 console.error(`Error updating ${property.address}:`, updateError);
               }
@@ -165,9 +165,15 @@ serve(async (req) => {
         }
       }
 
-      // Rate limiting - 90 second delay to stay well under rate limits (< 1 request/min)
-      await new Promise(resolve => setTimeout(resolve, 90000));
-    }
+      return 0;
+    };
+
+    // Process both properties in parallel
+    const results = await Promise.all(
+      (properties || []).map(property => processProperty(property))
+    );
+    
+    const updated: number = results.reduce((sum: number, result: number) => sum + result, 0);
 
     console.log(`Successfully updated ${updated} property images`);
 
