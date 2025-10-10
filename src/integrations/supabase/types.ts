@@ -113,6 +113,8 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           city: string | null
+          contact_email: string | null
+          contact_phone: string | null
           created_at: string | null
           description: string | null
           external_id: string | null
@@ -120,6 +122,7 @@ export type Database = {
           image_url: string | null
           is_active: boolean | null
           last_verified_at: string | null
+          listing_type: string | null
           listing_url: string | null
           lot_size: number | null
           price: number
@@ -128,6 +131,7 @@ export type Database = {
           square_feet: number | null
           state: string | null
           updated_at: string | null
+          user_id: string | null
           year_built: number | null
           zip_code: string
         }
@@ -136,6 +140,8 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string | null
           description?: string | null
           external_id?: string | null
@@ -143,6 +149,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           last_verified_at?: string | null
+          listing_type?: string | null
           listing_url?: string | null
           lot_size?: number | null
           price: number
@@ -151,6 +158,7 @@ export type Database = {
           square_feet?: number | null
           state?: string | null
           updated_at?: string | null
+          user_id?: string | null
           year_built?: number | null
           zip_code: string
         }
@@ -159,6 +167,8 @@ export type Database = {
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
           created_at?: string | null
           description?: string | null
           external_id?: string | null
@@ -166,6 +176,7 @@ export type Database = {
           image_url?: string | null
           is_active?: boolean | null
           last_verified_at?: string | null
+          listing_type?: string | null
           listing_url?: string | null
           lot_size?: number | null
           price?: number
@@ -174,6 +185,7 @@ export type Database = {
           square_feet?: number | null
           state?: string | null
           updated_at?: string | null
+          user_id?: string | null
           year_built?: number | null
           zip_code?: string
         }

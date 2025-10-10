@@ -1,19 +1,17 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
-import { Loader2, Crown, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { useSubscription } from "@/hooks/useSubscription";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [properties, setProperties] = useState<any[]>([]);
   const [totalProperties, setTotalProperties] = useState(0);
@@ -27,32 +25,14 @@ export default function Dashboard() {
     sortBy: "newest"
   });
 
-  const subscription = useSubscription(user);
-
-  useEffect(() => {
-    // Check for checkout success/cancel
-    const checkout = searchParams.get('checkout');
-    if (checkout === 'success') {
-      toast.success('Successfully subscribed to Premium!');
-      subscription.checkSubscription();
-    } else if (checkout === 'cancel') {
-      toast.error('Checkout canceled');
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/");
-      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/");
-      }
     });
 
     return () => subscription.unsubscribe();
@@ -60,16 +40,14 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-    if (user) {
-      setCurrentPage(1); // Reset to page 1 when filters change
-      fetchProperties();
-    }
-  }, [user, filters]);
+    setCurrentPage(1); // Reset to page 1 when filters change
+    fetchProperties();
+  }, [filters]);
 
 
   // Fetch properties when page changes
   useEffect(() => {
-    if (user && currentPage > 1) {
+    if (currentPage > 1) {
       fetchProperties();
     }
   }, [currentPage]);
@@ -130,11 +108,10 @@ export default function Dashboard() {
   };
 
   const totalPages = Math.ceil(totalProperties / itemsPerPage);
-  const displayedProperties = subscription.subscribed ? properties : properties.slice(0, 6);
-  const showPagination = subscription.subscribed && totalPages > 1;
+  const showPagination = totalPages > 1;
 
-  // Show loading state if either properties or subscription is still loading
-  const isLoading = loading || subscription.loading;
+  // Show loading state
+  const isLoading = loading;
 
   return (
     <div className="min-h-screen bg-background">
@@ -158,57 +135,10 @@ export default function Dashboard() {
                   Refresh
                 </Button>
               </div>
-              <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia&apos;s Kensington neighborhood</p>
+              <p className="text-muted-foreground">Free property listings for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
-            
-            {!subscription.loading && !subscription.subscribed && (
-              <Card className="bg-gradient-primary text-white border-0">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-5 w-5" />
-                    <CardTitle className="text-lg">Upgrade to Premium</CardTitle>
-                  </div>
-                  <CardDescription className="text-white/90">
-                    Get unlimited access for $10/month
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button 
-                    onClick={subscription.createCheckout}
-                    variant="secondary"
-                    className="w-full"
-                  >
-                    Subscribe Now
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-            
-            {!subscription.loading && subscription.subscribed && (
-              <Card className="border-2 border-primary">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <Crown className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">Premium Active</CardTitle>
-                  </div>
-                  <CardDescription>
-                    {subscription.subscription_end && `Renews ${new Date(subscription.subscription_end).toLocaleDateString()}`}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            )}
           </div>
         </div>
-
-        {!subscription.loading && !subscription.subscribed && (
-          <Card className="mb-6 border-primary/50 bg-primary/5">
-            <CardContent className="py-4">
-              <p className="text-sm text-muted-foreground text-center">
-                <strong>Free tier:</strong> You can view {displayedProperties.length} properties. Upgrade to Premium for unlimited access and full ROI analysis.
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
 
         <Card className="mb-6 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
@@ -228,14 +158,12 @@ export default function Dashboard() {
         ) : (
           <>
             <div className="mb-4 text-sm text-muted-foreground">
-              {subscription.subscribed && (
-                <p>Showing {properties.length} of {totalProperties} properties (Page {currentPage} of {totalPages})</p>
-              )}
+              <p>Showing {properties.length} of {totalProperties} properties (Page {currentPage} of {totalPages})</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayedProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} isPremium={subscription.subscribed} />
+              {properties.map((property) => (
+                <PropertyCard key={property.id} property={property} isPremium={true} />
               ))}
             </div>
             
@@ -304,22 +232,6 @@ export default function Dashboard() {
               </div>
             )}
             
-            {!subscription.subscribed && properties.length > 6 && (
-              <Card className="mt-8 bg-gradient-primary text-white border-0">
-                <CardContent className="py-8 text-center space-y-4">
-                  <Crown className="h-12 w-12 mx-auto" />
-                  <h3 className="text-2xl font-bold">Want to see {properties.length - 6} more properties?</h3>
-                  <p className="text-white/90">Upgrade to Premium for unlimited property access and full analysis</p>
-                  <Button 
-                    onClick={subscription.createCheckout}
-                    variant="secondary"
-                    size="lg"
-                  >
-                    Upgrade to Premium - $10/month
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
           </>
         )}
 
