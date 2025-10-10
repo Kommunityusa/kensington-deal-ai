@@ -65,13 +65,51 @@ serve(async (req) => {
           const firecrawlData = await firecrawlResponse.json();
           console.log(`Search response for ${fullAddress}:`, JSON.stringify(firecrawlData).substring(0, 300));
           
-          // Try to get image from search results
+          // Try to get image from search results - check multiple possible image locations
           if (firecrawlData.data && firecrawlData.data.length > 0) {
             for (const result of firecrawlData.data) {
+              // Try multiple image sources
               if (result.metadata?.ogImage) {
                 imageUrl = result.metadata.ogImage;
                 console.log(`Found OG image from search: ${imageUrl}`);
                 break;
+              } else if (result.metadata?.image) {
+                imageUrl = result.metadata.image;
+                console.log(`Found metadata image from search: ${imageUrl}`);
+                break;
+              } else if (result.image) {
+                imageUrl = result.image;
+                console.log(`Found direct image from search: ${imageUrl}`);
+                break;
+              }
+            }
+            
+            // If still no image, try to scrape the first result URL
+            if (!imageUrl && firecrawlData.data[0]?.url) {
+              try {
+                console.log(`Scraping URL for images: ${firecrawlData.data[0].url}`);
+                const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    url: firecrawlData.data[0].url,
+                    formats: ['markdown'],
+                    onlyMainContent: false,
+                  }),
+                });
+                
+                if (scrapeResponse.ok) {
+                  const scrapeData = await scrapeResponse.json();
+                  if (scrapeData.data?.metadata?.ogImage) {
+                    imageUrl = scrapeData.data.metadata.ogImage;
+                    console.log(`Found image from scrape: ${imageUrl}`);
+                  }
+                }
+              } catch (scrapeError) {
+                console.error('Error scraping for images:', scrapeError);
               }
             }
           }

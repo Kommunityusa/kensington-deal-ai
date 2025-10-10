@@ -175,14 +175,17 @@ export const KensingtonNews = () => {
                   )}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
+              <CardContent className="space-y-3">
+                <p className="text-sm text-muted-foreground line-clamp-3">
                   {article.description}
                 </p>
                 {article.sentiment_details?.reasoning && (
-                  <p className="text-xs italic text-muted-foreground mb-4 line-clamp-2">
-                    {article.sentiment_details.reasoning}
-                  </p>
+                  <div className="p-3 bg-muted rounded-lg">
+                    <p className="text-xs font-semibold mb-1">AI Analysis</p>
+                    <p className="text-xs text-muted-foreground">
+                      {article.sentiment_details.reasoning}
+                    </p>
+                  </div>
                 )}
                 <a
                   href={article.url}
