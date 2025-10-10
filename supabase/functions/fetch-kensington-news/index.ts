@@ -33,7 +33,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         query: 'Kensington Philadelphia real estate news property market investment',
-        limit: 15,
+        limit: 3, // Reduced to respect rate limits
       }),
     });
 

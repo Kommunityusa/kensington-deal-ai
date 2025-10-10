@@ -11,6 +11,11 @@ interface NewsArticle {
   source: string;
   publishedAt: string;
   imageUrl?: string;
+  sentiment?: string;
+  sentiment_score?: number;
+  sentiment_details?: {
+    reasoning?: string;
+  };
 }
 
 export const KensingtonNews = () => {
@@ -43,9 +48,12 @@ export const KensingtonNews = () => {
         const { data: apiData, error: apiError } = await supabase.functions.invoke('fetch-kensington-news');
         
         if (!apiError && apiData?.success) {
-          // Trigger image fetch
+          // Trigger image and sentiment fetch
           supabase.functions.invoke('fetch-news-images').then(() => {
             console.log('Image fetch triggered');
+          });
+          supabase.functions.invoke('analyze-news-sentiment').then(() => {
+            console.log('Sentiment analysis triggered');
           });
           
           // Refetch from database after API call populated it
@@ -63,6 +71,9 @@ export const KensingtonNews = () => {
               source: article.source || '',
               publishedAt: article.published_at || '',
               imageUrl: article.image_url || '',
+              sentiment: article.sentiment || undefined,
+              sentiment_score: article.sentiment_score || undefined,
+              sentiment_details: article.sentiment_details as { reasoning?: string } || undefined,
             })));
           }
         }
@@ -74,6 +85,9 @@ export const KensingtonNews = () => {
           source: article.source || '',
           publishedAt: article.published_at || '',
           imageUrl: article.image_url || '',
+          sentiment: article.sentiment || undefined,
+          sentiment_score: article.sentiment_score || undefined,
+          sentiment_details: article.sentiment_details as { reasoning?: string } || undefined,
         })));
         
         // If articles don't have images, trigger image fetch
@@ -147,14 +161,29 @@ export const KensingtonNews = () => {
                 <CardTitle className="text-lg line-clamp-2">
                   {article.title}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-1">
+                <CardDescription className="flex items-center gap-2 justify-between">
                   <span className="text-xs">{article.source}</span>
+                  {article.sentiment && (
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      article.sentiment === 'positive' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
+                      article.sentiment === 'negative' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                      'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
+                    }`}>
+                      {article.sentiment}
+                      {article.sentiment_score && ` (${Math.round(article.sentiment_score * 100)}%)`}
+                    </span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
                   {article.description}
                 </p>
+                {article.sentiment_details?.reasoning && (
+                  <p className="text-xs italic text-muted-foreground mb-4 line-clamp-2">
+                    {article.sentiment_details.reasoning}
+                  </p>
+                )}
                 <a
                   href={article.url}
                   target="_blank"

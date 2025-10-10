@@ -81,6 +81,9 @@ export type Database = {
           id: string
           image_url: string | null
           published_at: string | null
+          sentiment: string | null
+          sentiment_details: Json | null
+          sentiment_score: number | null
           source: string | null
           title: string
           updated_at: string
@@ -92,6 +95,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           published_at?: string | null
+          sentiment?: string | null
+          sentiment_details?: Json | null
+          sentiment_score?: number | null
           source?: string | null
           title: string
           updated_at?: string
@@ -103,6 +109,9 @@ export type Database = {
           id?: string
           image_url?: string | null
           published_at?: string | null
+          sentiment?: string | null
+          sentiment_details?: Json | null
+          sentiment_score?: number | null
           source?: string | null
           title?: string
           updated_at?: string
