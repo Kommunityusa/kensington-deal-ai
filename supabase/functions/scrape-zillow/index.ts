@@ -39,10 +39,10 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Scrape Zillow Philadelphia properties for sale
-    const zillowUrl = 'https://www.zillow.com/philadelphia-pa/';
+    // Scrape Zillow Kensington Philadelphia properties for sale
+    const zillowUrl = 'https://www.zillow.com/philadelphia-pa/kensington/';
     
-    console.log(`Crawling Zillow: ${zillowUrl}`);
+    console.log(`Crawling Zillow Kensington: ${zillowUrl}`);
 
     const crawlResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
       method: 'POST',
@@ -52,14 +52,14 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         url: zillowUrl,
-        limit: 50, // Limit to 50 pages to avoid hitting rate limits
+        limit: 100, // Increase limit for more Kensington properties
         scrapeOptions: {
           formats: ['markdown', 'html'],
           onlyMainContent: true,
-          includeTags: ['.property-card', '.list-card', '.result-list'],
-          excludeTags: ['nav', 'footer', 'header', '.ad']
+          includeTags: ['.property-card', '.list-card', '.result-list', '.search-result'],
+          excludeTags: ['nav', 'footer', 'header', '.ad', '.advertisement']
         },
-        maxDepth: 2 // Only crawl 2 levels deep
+        maxDepth: 3 // Crawl deeper for more listings
       })
     });
 
@@ -118,7 +118,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const properties = [];
 
-    for (const doc of documents.slice(0, 20)) { // Process first 20 documents
+    for (const doc of documents.slice(0, 30)) { // Process first 30 documents for Kensington
       if (!doc.markdown) continue;
 
       try {
@@ -137,7 +137,7 @@ serve(async (req) => {
               },
               {
                 role: "user",
-                content: `Extract property data from this content. Return ONLY a JSON array of properties, each with: address, price (number), bedrooms (number), bathrooms (number), square_feet (number), property_type, description, year_built (number or null), listing_url. If no properties found, return empty array [].\n\n${doc.markdown.slice(0, 3000)}`
+                content: `Extract property data from this Kensington, Philadelphia content. Return ONLY a JSON array of properties, each with: address, price (number), bedrooms (number), bathrooms (number), square_feet (number), property_type, description, year_built (number or null), listing_url, zip_code. If no properties found, return empty array [].\n\n${doc.markdown.slice(0, 3000)}`
               }
             ],
             tools: [{
@@ -160,7 +160,7 @@ serve(async (req) => {
                           property_type: { type: "string" },
                           description: { type: "string" },
                           year_built: { type: ["number", "null"] },
-                          listing_url: { type: "string" }
+                          zip_code: { type: "string" },
                         },
                         required: ["address", "price"]
                       }
