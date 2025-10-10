@@ -278,7 +278,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_street_view_url: {
+        Args: {
+          address: string
+          api_key: string
+          city: string
+          state: string
+          zip: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

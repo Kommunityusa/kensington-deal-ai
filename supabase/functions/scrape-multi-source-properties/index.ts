@@ -15,8 +15,14 @@ serve(async (req) => {
     console.log('Starting automated property scraping with Rentcast API');
 
     const RENTCAST_API_KEY = Deno.env.get('RENTCAST_API_KEY');
+    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    
     if (!RENTCAST_API_KEY) {
       throw new Error('RENTCAST_API_KEY is not configured');
+    }
+    
+    if (!GOOGLE_MAPS_API_KEY) {
+      throw new Error('GOOGLE_MAPS_API_KEY is not configured');
     }
 
     const supabaseClient = createClient(
@@ -75,6 +81,11 @@ serve(async (req) => {
               continue;
             }
 
+            // Generate Google Street View image URL
+            const fullAddress = `${listing.addressLine1}, ${listing.city || 'Philadelphia'}, ${listing.state || 'PA'} ${listing.zipCode || zipCode}`;
+            const streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(fullAddress)}&key=${GOOGLE_MAPS_API_KEY}`;
+
+
             // Map Rentcast data to our schema
             const property = {
               external_id: listing.id || `rentcast-${zipCode}-${totalScraped}`,
@@ -88,7 +99,7 @@ serve(async (req) => {
               bathrooms: listing.bathrooms || null,
               square_feet: listing.squareFootage || null,
               property_type: listing.propertyType || 'Single Family',
-              image_url: listing.photos?.[0] || listing.imageUrl || listing.image || `https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop`,
+              image_url: streetViewUrl,
               listing_url: listing.url || null,
               description: listing.description || null,
               year_built: listing.yearBuilt || null,
