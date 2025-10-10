@@ -43,6 +43,11 @@ export const KensingtonNews = () => {
         const { data: apiData, error: apiError } = await supabase.functions.invoke('fetch-kensington-news');
         
         if (!apiError && apiData?.success) {
+          // Trigger image fetch
+          supabase.functions.invoke('fetch-news-images').then(() => {
+            console.log('Image fetch triggered');
+          });
+          
           // Refetch from database after API call populated it
           const { data: refreshedData } = await supabase
             .from('news_articles')
@@ -70,6 +75,16 @@ export const KensingtonNews = () => {
           publishedAt: article.published_at || '',
           imageUrl: article.image_url || '',
         })));
+        
+        // If articles don't have images, trigger image fetch
+        const hasNoImages = data.every(article => !article.image_url);
+        if (hasNoImages) {
+          console.log('Fetching images for articles...');
+          supabase.functions.invoke('fetch-news-images').then(() => {
+            console.log('Image fetch triggered, refreshing in 5 seconds...');
+            setTimeout(() => fetchNews(), 5000);
+          });
+        }
       }
     } catch (error) {
       console.error('Error:', error);
