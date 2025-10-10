@@ -78,49 +78,7 @@ serve(async (req) => {
               continue;
             }
 
-            let imageUrl = null;
-
-            // Try to extract image from listing URL using Firecrawl
-            if (listing.url) {
-              try {
-                console.log(`Scraping listing URL with Firecrawl: ${listing.url}`);
-                const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-                  method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({
-                    url: listing.url,
-                    formats: ['markdown', 'html'],
-                    onlyMainContent: true,
-                  }),
-                });
-
-                if (firecrawlResponse.ok) {
-                  const firecrawlData = await firecrawlResponse.json();
-                  
-                  // Extract image from metadata or HTML
-                  if (firecrawlData.data?.metadata?.ogImage) {
-                    imageUrl = firecrawlData.data.metadata.ogImage;
-                  } else if (firecrawlData.data?.html) {
-                    // Try to find the first property image in HTML
-                    const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-                    if (imgMatch && imgMatch[1]) {
-                      imageUrl = imgMatch[1];
-                    }
-                  }
-                  
-                  if (imageUrl) {
-                    console.log(`Found image via Firecrawl: ${imageUrl}`);
-                  }
-                }
-              } catch (firecrawlError) {
-                console.error(`Firecrawl error for ${listing.url}:`, firecrawlError);
-              }
-            }
-
-            // Map Rentcast data to our schema
+            // Map Rentcast data to our schema - insert without image first
             const property = {
               external_id: listing.id || `rentcast-${zipCode}-${totalScraped}`,
               source: 'rentcast',
@@ -133,7 +91,7 @@ serve(async (req) => {
               bathrooms: listing.bathrooms || null,
               square_feet: listing.squareFootage || null,
               property_type: listing.propertyType || 'Single Family',
-              image_url: imageUrl,
+              image_url: null, // Will be updated in background
               listing_url: listing.url || null,
               description: listing.description || null,
               year_built: listing.yearBuilt || null,
@@ -144,16 +102,61 @@ serve(async (req) => {
             };
 
             // Insert into database
-            const { error } = await supabaseClient
+            const { data: insertedProperty, error } = await supabaseClient
               .from('properties')
               .upsert(property, {
                 onConflict: 'external_id',
-              });
+              })
+              .select()
+              .single();
 
-            if (!error) {
+            if (!error && insertedProperty && listing.url) {
               totalInserted++;
               console.log(`Inserted property: ${property.address}`);
-            } else {
+              
+              // Fetch image in background (without await)
+              (async () => {
+                try {
+                  console.log(`Background: Fetching image for ${listing.url}`);
+                  const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      url: listing.url,
+                      formats: ['markdown', 'html'],
+                      onlyMainContent: true,
+                    }),
+                  });
+
+                  if (firecrawlResponse.ok) {
+                    const firecrawlData = await firecrawlResponse.json();
+                    let imageUrl = null;
+                    
+                    if (firecrawlData.data?.metadata?.ogImage) {
+                      imageUrl = firecrawlData.data.metadata.ogImage;
+                    } else if (firecrawlData.data?.html) {
+                      const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+                      if (imgMatch && imgMatch[1]) {
+                        imageUrl = imgMatch[1];
+                      }
+                    }
+                    
+                    if (imageUrl) {
+                      await supabaseClient
+                        .from('properties')
+                        .update({ image_url: imageUrl })
+                        .eq('id', insertedProperty.id);
+                      console.log(`Background: Updated image for ${property.address}`);
+                    }
+                  }
+                } catch (bgError) {
+                  console.error(`Background: Error fetching image for ${listing.url}:`, bgError);
+                }
+              })(); // Fire and forget
+            } else if (error) {
               console.error('Error inserting property:', error);
             }
 
