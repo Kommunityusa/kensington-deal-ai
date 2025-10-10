@@ -122,6 +122,30 @@ export default function Dashboard() {
     setLoading(false);
   };
 
+  const fetchPhillyOPAProperties = async () => {
+    setLoading(true);
+    toast.info("Fetching from Philadelphia public records...");
+    console.log('Fetching from Philadelphia OPA database');
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-philly-properties');
+
+      console.log('Philly OPA response:', { data, error });
+
+      if (error) {
+        console.error("Error fetching Philly OPA properties:", error);
+        toast.error(`Failed to fetch public records: ${error.message}`);
+      } else {
+        toast.success(`✓ ${data.message || 'Philadelphia public records fetched successfully'}`);
+        // Refresh the properties list
+        await fetchProperties();
+      }
+    } catch (error) {
+      console.error("Error calling fetch-philly-properties function:", error);
+      toast.error("Failed to fetch Philadelphia public records.");
+    }
+    setLoading(false);
+  };
+
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -144,18 +168,29 @@ export default function Dashboard() {
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-2">
                 <h1 className="text-4xl font-bold">Kensington Investment Opportunities</h1>
-                <Button
-                  onClick={() => {
-                    toast.info("Refreshing properties...");
-                    fetchProperties();
-                  }}
-                  variant="outline"
-                  size="sm"
-                  disabled={loading}
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      toast.info("Refreshing properties...");
+                      fetchProperties();
+                    }}
+                    variant="outline"
+                    size="sm"
+                    disabled={loading}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <Button
+                    onClick={fetchPhillyOPAProperties}
+                    variant="default"
+                    size="sm"
+                    disabled={loading}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                    Load Public Records
+                  </Button>
+                </div>
               </div>
               <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
