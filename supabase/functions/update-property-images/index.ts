@@ -43,43 +43,43 @@ serve(async (req) => {
       const fullAddress = `${property.address}, ${property.city || 'Philadelphia'}, ${property.state || 'PA'} ${property.zip_code}`;
       let imageUrl = null;
 
-      // First try: If listing URL exists, scrape it
-      if (property.listing_url && property.listing_url.trim() !== '') {
-        try {
-          console.log(`Scraping listing URL: ${property.listing_url} for ${fullAddress}`);
-          const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              url: property.listing_url,
-              formats: ['markdown', 'html'],
-              onlyMainContent: true,
-            }),
-          });
+      try {
+        // Use Firecrawl to search for property images
+        const searchQuery = `${fullAddress} property`;
+        console.log(`Searching for images for: ${searchQuery}`);
+        
+        const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/search', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: searchQuery,
+            limit: 3,
+          }),
+        });
 
-          if (firecrawlResponse.ok) {
-            const firecrawlData = await firecrawlResponse.json();
-            console.log(`Firecrawl response for ${fullAddress}:`, JSON.stringify(firecrawlData).substring(0, 200));
-            
-            if (firecrawlData.data?.metadata?.ogImage) {
-              imageUrl = firecrawlData.data.metadata.ogImage;
-              console.log(`Found OG image: ${imageUrl}`);
-            } else if (firecrawlData.data?.html) {
-              const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
-              if (imgMatch && imgMatch[1]) {
-                imageUrl = imgMatch[1];
-                console.log(`Found img tag: ${imageUrl}`);
+        if (firecrawlResponse.ok) {
+          const firecrawlData = await firecrawlResponse.json();
+          console.log(`Search response for ${fullAddress}:`, JSON.stringify(firecrawlData).substring(0, 300));
+          
+          // Try to get image from search results
+          if (firecrawlData.data && firecrawlData.data.length > 0) {
+            for (const result of firecrawlData.data) {
+              if (result.metadata?.ogImage) {
+                imageUrl = result.metadata.ogImage;
+                console.log(`Found OG image from search: ${imageUrl}`);
+                break;
               }
             }
-          } else {
-            console.error(`Firecrawl request failed with status ${firecrawlResponse.status}`);
           }
-        } catch (urlError) {
-          console.error(`Error scraping listing URL for ${fullAddress}:`, urlError);
+        } else {
+          const errorText = await firecrawlResponse.text();
+          console.error(`Firecrawl search failed with status ${firecrawlResponse.status}: ${errorText}`);
         }
+      } catch (searchError) {
+        console.error(`Error searching for ${fullAddress}:`, searchError);
       }
 
       if (imageUrl) {
@@ -94,10 +94,12 @@ serve(async (req) => {
         } else {
           console.error(`Error updating ${property.address}:`, updateError);
         }
+      } else {
+        console.log(`No image found for: ${property.address}`);
       }
 
       // Rate limiting to avoid overwhelming Firecrawl API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
     console.log(`Successfully updated ${updated} property images`);
