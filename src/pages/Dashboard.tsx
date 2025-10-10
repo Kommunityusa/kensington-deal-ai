@@ -58,6 +58,29 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Temporary: Trigger Redfin scraper once
+  useEffect(() => {
+    const triggerScraper = async () => {
+      try {
+        console.log('Triggering Redfin scraper...');
+        toast.info('Scraping Redfin properties...');
+        const { data, error } = await supabase.functions.invoke('scrape-redfin');
+        if (error) {
+          console.error('Scraper error:', error);
+          toast.error('Scraper failed: ' + error.message);
+        } else {
+          console.log('Scraper result:', data);
+          toast.success('Scraper completed: ' + (data?.message || 'Done'));
+          fetchProperties();
+        }
+      } catch (err) {
+        console.error('Failed to trigger scraper:', err);
+        toast.error('Failed to trigger scraper');
+      }
+    };
+    triggerScraper();
+  }, []);
+
   useEffect(() => {
     if (user) {
       setCurrentPage(1); // Reset to page 1 when filters change
