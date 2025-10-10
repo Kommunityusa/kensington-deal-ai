@@ -398,8 +398,12 @@ serve(async (req) => {
       }
 
       // Mark properties as inactive if they weren't found in the latest fetch
-      // Only mark properties with external_id as stale (properties from APIs)
-      const staleIds = Array.from(existingIds).filter(id => id && !fetchedIds.has(id));
+      // Only mark properties with external_id as stale AND only from API sources (not philly-opa)
+      const staleIds = Array.from(existingIds).filter(id => 
+        id && 
+        !fetchedIds.has(id) && 
+        !id.startsWith('philly-opa-') // Don't mark Philadelphia public records as inactive
+      );
       if (staleIds.length > 0) {
         const { error: updateError } = await supabaseClient
           .from('properties')
