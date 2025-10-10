@@ -58,25 +58,6 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Manual trigger for image scraper
-  const triggerImageScraper = async () => {
-    try {
-      console.log('Triggering property image scraper...');
-      toast.info('Fetching property images from Google Street View...', { duration: 5000 });
-      const { data, error } = await supabase.functions.invoke('scrape-property-images');
-      if (error) {
-        console.error('Image scraper error:', error);
-        toast.error('Image scraper failed: ' + error.message);
-      } else {
-        console.log('Image scraper result:', data);
-        toast.success(data?.message || 'Images updated successfully');
-        fetchProperties();
-      }
-    } catch (err) {
-      console.error('Failed to trigger image scraper:', err);
-      toast.error('Failed to trigger image scraper');
-    }
-  };
 
   useEffect(() => {
     if (user) {
@@ -164,27 +145,18 @@ export default function Dashboard() {
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-2">
                 <h1 className="text-4xl font-bold">Kensington Investment Opportunities</h1>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => {
-                      toast.info("Refreshing properties...");
-                      fetchProperties();
-                    }}
-                    variant="outline"
-                    size="sm"
-                    disabled={loading}
-                  >
-                    <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </Button>
-                  <Button
-                    onClick={triggerImageScraper}
-                    variant="outline"
-                    size="sm"
-                  >
-                    Update Images
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => {
+                    toast.info("Refreshing properties...");
+                    fetchProperties();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </div>
               <p className="text-muted-foreground">AI-powered real estate analysis for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
