@@ -28,20 +28,22 @@ serve(async (req) => {
     // Get properties without images
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
-      .select('id, address, city, state, zip_code')
+      .select('id, address, city, state, zip_code, image_url')
       .eq('source', 'philly-opa')
-      .or('image_url.is.null,image_url.eq.')
       .limit(50); // Process 50 at a time
+    
+    // Filter for properties with empty or null image_url
+    const propertiesWithoutImages = properties?.filter(p => !p.image_url || p.image_url.trim() === '') || [];
 
     if (fetchError) {
       throw new Error(`Failed to fetch properties: ${fetchError.message}`);
     }
 
-    console.log(`Found ${properties?.length || 0} properties without images`);
+    console.log(`Found ${propertiesWithoutImages.length} properties without images`);
 
     let updatedCount = 0;
 
-    for (const property of properties || []) {
+    for (const property of propertiesWithoutImages) {
       try {
         const fullAddress = `${property.address}, ${property.city}, ${property.state} ${property.zip_code}`;
         console.log(`Fetching image for: ${fullAddress}`);
@@ -83,7 +85,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       success: true,
       message: `Updated ${updatedCount} properties with Street View images`,
-      propertiesProcessed: properties?.length || 0,
+      propertiesProcessed: propertiesWithoutImages.length,
       propertiesUpdated: updatedCount
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
