@@ -134,6 +134,23 @@ export default function Dashboard() {
                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
                 </Button>
+                <Button
+                  onClick={async () => {
+                    toast.info("Fetching property images with Firecrawl...");
+                    const { data, error } = await supabase.functions.invoke('update-property-images');
+                    if (error) {
+                      toast.error("Failed to fetch images");
+                    } else {
+                      toast.success(`Updated ${data.updated} of ${data.total} property images!`);
+                      setTimeout(() => fetchProperties(), 2000);
+                    }
+                  }}
+                  variant="secondary"
+                  size="sm"
+                  disabled={loading}
+                >
+                  Fetch Images
+                </Button>
               </div>
               <p className="text-muted-foreground">Free property listings for Philadelphia&apos;s Kensington neighborhood</p>
             </div>

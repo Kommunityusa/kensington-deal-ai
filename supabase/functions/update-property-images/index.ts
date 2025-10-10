@@ -12,12 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting property image update with Google Street View');
+    console.log('Starting property image update with Firecrawl');
 
-    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
     
-    if (!GOOGLE_MAPS_API_KEY) {
-      throw new Error('GOOGLE_MAPS_API_KEY is not configured');
+    if (!FIRECRAWL_API_KEY) {
+      throw new Error('FIRECRAWL_API_KEY is not configured');
     }
 
     const supabaseClient = createClient(
@@ -25,11 +25,12 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Fetch all rentcast properties to update with fresh Google Street View images
+    // Fetch all rentcast properties without images
     const { data: properties, error: fetchError } = await supabaseClient
       .from('properties')
-      .select('id, address, city, state, zip_code, image_url')
-      .eq('source', 'rentcast');
+      .select('id, address, city, state, zip_code, image_url, listing_url')
+      .eq('source', 'rentcast')
+      .is('image_url', null);
 
     if (fetchError) {
       throw fetchError;
@@ -40,26 +41,65 @@ serve(async (req) => {
     let updated = 0;
     for (const property of properties || []) {
       const fullAddress = `${property.address}, ${property.city || 'Philadelphia'}, ${property.state || 'PA'} ${property.zip_code}`;
-      const streetViewUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(fullAddress)}&key=${GOOGLE_MAPS_API_KEY}`;
+      let imageUrl = null;
 
-      const { error: updateError } = await supabaseClient
-        .from('properties')
-        .update({ image_url: streetViewUrl })
-        .eq('id', property.id);
+      // First try: If listing URL exists, scrape it
+      if (property.listing_url) {
+        try {
+          console.log(`Scraping listing URL for ${fullAddress}`);
+          const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              url: property.listing_url,
+              formats: ['markdown', 'html'],
+              onlyMainContent: true,
+            }),
+          });
 
-      if (!updateError) {
-        updated++;
-        console.log(`Updated image for: ${property.address}`);
-      } else {
-        console.error(`Error updating ${property.address}:`, updateError);
+          if (firecrawlResponse.ok) {
+            const firecrawlData = await firecrawlResponse.json();
+            
+            if (firecrawlData.data?.metadata?.ogImage) {
+              imageUrl = firecrawlData.data.metadata.ogImage;
+            } else if (firecrawlData.data?.html) {
+              const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+              if (imgMatch && imgMatch[1]) {
+                imageUrl = imgMatch[1];
+              }
+            }
+          }
+        } catch (urlError) {
+          console.error(`Error scraping listing URL for ${fullAddress}:`, urlError);
+        }
       }
+
+      if (imageUrl) {
+        const { error: updateError } = await supabaseClient
+          .from('properties')
+          .update({ image_url: imageUrl })
+          .eq('id', property.id);
+
+        if (!updateError) {
+          updated++;
+          console.log(`Updated image for: ${property.address}`);
+        } else {
+          console.error(`Error updating ${property.address}:`, updateError);
+        }
+      }
+
+      // Rate limiting to avoid overwhelming Firecrawl API
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     console.log(`Successfully updated ${updated} property images`);
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Updated ${updated} property images with Google Street View`,
+      message: `Updated ${updated} property images with Firecrawl`,
       total: properties?.length || 0,
       updated
     }), {
