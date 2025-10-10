@@ -149,24 +149,6 @@ export default function Dashboard() {
                 >
                   <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
-                <Button
-                  onClick={async () => {
-                    toast.info("Fetching property images with Firecrawl...");
-                    const { data, error } = await supabase.functions.invoke('update-property-images');
-                    if (error) {
-                      toast.error("Failed to fetch images");
-                    } else {
-                      toast.success(`Updated ${data.updated} of ${data.total} property images!`);
-                      setTimeout(() => fetchProperties(), 2000);
-                    }
-                  }}
-                  variant="secondary"
-                  size="sm"
-                  disabled={loading}
-                  className="hidden md:flex"
-                >
-                  Fetch Images
-                </Button>
               </div>
             </div>
           </div>
