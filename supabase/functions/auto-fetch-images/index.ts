@@ -26,7 +26,12 @@ serve(async (req) => {
       body: JSON.stringify({})
     });
     
-    const result = await response.json();
+    let result;
+    try {
+      result = await response.json();
+    } catch (e) {
+      result = { error: 'Failed to parse response', status: response.status };
+    }
     console.log('Auto-fetch result:', result);
     
     return new Response(JSON.stringify({ 
