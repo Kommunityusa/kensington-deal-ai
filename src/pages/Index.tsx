@@ -49,22 +49,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Navigation */}
-      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Home className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Kensington Deals</span>
+            <Home className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <span className="text-lg md:text-xl font-bold">Kensington Deals</span>
           </div>
-          <div className="flex items-center gap-6">
-            <Link to="/about" className="text-sm hover:text-primary transition-colors">
+          <div className="flex items-center gap-3 md:gap-6">
+            <Link to="/about" className="text-xs md:text-sm hover:text-primary transition-colors">
               About
             </Link>
-            <div className="flex gap-3">
-              <Button variant="ghost" asChild>
+            <div className="flex gap-2 md:gap-3">
+              <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
                 <Link to="/auth">Sign In</Link>
               </Button>
-              <Button variant="default" asChild>
-                <Link to="/auth">Get Started Free</Link>
+              <Button variant="default" size="sm" asChild>
+                <Link to="/auth">Get Started</Link>
               </Button>
             </div>
           </div>
@@ -72,23 +72,23 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
-          <Badge variant="secondary" className="mb-4">Kensington, Philadelphia Real Estate</Badge>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
+      <section className="container mx-auto px-4 py-12 md:py-20 text-center">
+        <div className="max-w-4xl mx-auto space-y-4 md:space-y-6 animate-fade-in">
+          <Badge variant="secondary" className="mb-2 md:mb-4 text-xs md:text-sm">Kensington, Philadelphia Real Estate</Badge>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
             Real Estate Investment Analysis for{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               Kensington
             </span>
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
             Access property data and investment metrics for the Kensington neighborhood in Philadelphia. View property details, pricing information, and market analysis.
           </p>
-          <div className="flex gap-4 justify-center pt-4">
-            <Button size="lg" variant="hero" asChild>
+          <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-4 px-4">
+            <Button size="lg" variant="hero" asChild className="w-full sm:w-auto">
               <Link to="/auth">View Properties</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" asChild className="w-full sm:w-auto">
               <Link to="/dashboard">Browse Listings</Link>
             </Button>
           </div>
@@ -96,10 +96,10 @@ const Index = () => {
       </section>
 
       {/* Properties Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Properties</h2>
-          <p className="text-muted-foreground text-lg">Click any property to sign up and view full details</p>
+      <section className="container mx-auto px-4 py-12 md:py-20">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Featured Properties</h2>
+          <p className="text-muted-foreground text-sm md:text-lg px-4">Click any property to sign up and view full details</p>
         </div>
         
         {loading ? (
@@ -107,15 +107,15 @@ const Index = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto mb-8 md:mb-12">
             {properties.map((property) => (
               <LandingPropertyCard key={property.id} property={property} />
             ))}
           </div>
         )}
 
-        <div className="text-center">
-          <Button size="lg" variant="hero" asChild>
+        <div className="text-center px-4">
+          <Button size="lg" variant="hero" asChild className="w-full sm:w-auto">
             <Link to="/auth">Sign Up to View All Properties</Link>
           </Button>
         </div>

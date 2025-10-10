@@ -118,10 +118,12 @@ export default function Dashboard() {
       <Navigation user={user} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex-1">
-            <div className="flex items-center gap-4 mb-2">
-                <h1 className="text-4xl font-bold">Kensington Investment Opportunities</h1>
+          <div className="flex items-center justify-between mb-4 gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold truncate">Kensington Investments</h1>
+              <p className="text-sm md:text-base text-muted-foreground mt-1">Free property listings for Philadelphia&apos;s Kensington neighborhood</p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
                 <Button
                   onClick={() => {
                     toast.info("Refreshing properties...");
@@ -130,9 +132,22 @@ export default function Dashboard() {
                   variant="outline"
                   size="sm"
                   disabled={loading}
+                  className="hidden sm:flex"
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
+                  <RefreshCw className={`h-4 w-4 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">Refresh</span>
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.info("Refreshing...");
+                    fetchProperties();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                  className="sm:hidden"
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
                 <Button
                   onClick={async () => {
@@ -148,14 +163,13 @@ export default function Dashboard() {
                   variant="secondary"
                   size="sm"
                   disabled={loading}
+                  className="hidden md:flex"
                 >
                   Fetch Images
                 </Button>
               </div>
-              <p className="text-muted-foreground">Free property listings for Philadelphia&apos;s Kensington neighborhood</p>
             </div>
           </div>
-        </div>
 
 
         <Card className="mb-6 border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
@@ -174,22 +188,24 @@ export default function Dashboard() {
           </div>
         ) : (
           <>
-            <div className="mb-4 text-sm text-muted-foreground">
+            <div className="mb-4 text-xs md:text-sm text-muted-foreground px-2">
               <p>Showing {properties.length} of {totalProperties} properties (Page {currentPage} of {totalPages})</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {properties.map((property) => (
                 <PropertyCard key={property.id} property={property} isPremium={true} />
               ))}
             </div>
             
             {showPagination && (
-              <div className="flex justify-center items-center gap-2 mt-8">
+              <div className="flex flex-wrap justify-center items-center gap-2 mt-6 md:mt-8 px-2">
                 <Button
                   onClick={() => handlePageChange(1)}
                   disabled={currentPage === 1 || loading}
                   variant="outline"
+                  size="sm"
+                  className="hidden sm:flex"
                   title="First page"
                 >
                   First
@@ -199,21 +215,22 @@ export default function Dashboard() {
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1 || loading}
                   variant="outline"
+                  size="sm"
                 >
-                  Previous
+                  Prev
                 </Button>
                 
                 <div className="flex gap-1">
-                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
                     let pageNum;
-                    if (totalPages <= 5) {
+                    if (totalPages <= 3) {
                       pageNum = i + 1;
-                    } else if (currentPage <= 3) {
+                    } else if (currentPage <= 2) {
                       pageNum = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + i;
+                    } else if (currentPage >= totalPages - 1) {
+                      pageNum = totalPages - 2 + i;
                     } else {
-                      pageNum = currentPage - 2 + i;
+                      pageNum = currentPage - 1 + i;
                     }
                     
                     return (
@@ -223,6 +240,7 @@ export default function Dashboard() {
                         disabled={loading}
                         variant={currentPage === pageNum ? "default" : "outline"}
                         size="sm"
+                        className="min-w-[40px]"
                       >
                         {pageNum}
                       </Button>
@@ -234,6 +252,7 @@ export default function Dashboard() {
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages || loading}
                   variant="outline"
+                  size="sm"
                 >
                   Next
                 </Button>
@@ -242,6 +261,8 @@ export default function Dashboard() {
                   onClick={() => handlePageChange(totalPages)}
                   disabled={currentPage === totalPages || loading}
                   variant="outline"
+                  size="sm"
+                  className="hidden sm:flex"
                   title="Last page"
                 >
                   Last
