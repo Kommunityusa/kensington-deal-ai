@@ -50,15 +50,15 @@ serve(async (req) => {
       `Title: ${a.title}\nSentiment: ${a.sentiment || 'N/A'} (${a.sentiment_score || 'N/A'})\nDescription: ${a.description || 'N/A'}`
     ).join('\n\n');
 
-    const prompt = `Analyze the following recent news articles about the Kensington neighborhood in Philadelphia. Provide a concise trend analysis (2-3 paragraphs) that:
-1. Identifies key themes and patterns in the real estate market
-2. Summarizes the overall sentiment and market direction
-3. Highlights any notable opportunities or concerns for investors
+    const prompt = `Analyze the following recent news articles about the Kensington neighborhood in Philadelphia. Provide a BRIEF trend analysis (2-3 sentences only) that summarizes:
+- The overall market sentiment and direction
+- One key opportunity or trend for investors
+
+Keep it concise and actionable. No more than 50 words.
 
 News Articles:
-${articlesContext}
+${articlesContext}`;
 
-Provide your analysis in a professional, engaging tone suitable for real estate investors.`;
 
     // Call Lovable AI for analysis
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {

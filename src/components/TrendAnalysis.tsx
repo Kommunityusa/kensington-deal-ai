@@ -90,20 +90,22 @@ export const TrendAnalysis = () => {
   }
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-primary/5 to-background border-primary/20">
-      <div className="flex items-start gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-primary/10">
-          <TrendingUp className="h-5 w-5 text-primary" />
+    <Card className="p-4 md:p-6 bg-gradient-to-br from-primary/5 to-background border-primary/20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
+            <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-base md:text-lg font-semibold mb-1">Market Trend Analysis</h3>
+            <p className="text-sm text-muted-foreground mb-2">
+              Based on {trendData.key_insights.total_articles} recent articles • {trendData.sentiment_summary}
+            </p>
+            <p className="text-sm md:text-base text-foreground leading-relaxed">
+              {trendData.analysis_text}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold">Market Trend Analysis</h3>
-          <p className="text-sm text-muted-foreground">
-            Based on {trendData.key_insights.total_articles} recent news articles • {trendData.sentiment_summary}
-          </p>
-        </div>
-      </div>
-      <div className="prose prose-sm max-w-none text-foreground">
-        <p className="whitespace-pre-line">{trendData.analysis_text}</p>
       </div>
     </Card>
   );
