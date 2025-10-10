@@ -50,11 +50,12 @@ serve(async (req) => {
       `Title: ${a.title}\nSentiment: ${a.sentiment || 'N/A'} (${a.sentiment_score || 'N/A'})\nDescription: ${a.description || 'N/A'}`
     ).join('\n\n');
 
-    const prompt = `Analyze the following recent news articles about the Kensington neighborhood in Philadelphia. Provide a BRIEF trend analysis (2-3 sentences only) that summarizes:
-- The overall market sentiment and direction
-- One key opportunity or trend for investors
+    const prompt = `Analyze the following recent news articles about the Kensington neighborhood in Philadelphia. Provide exactly 3 brief bullet points (each 10-15 words max):
+• Market sentiment and direction
+• Key opportunity for investors  
+• Main concern to watch
 
-Keep it concise and actionable. No more than 50 words.
+Format as bullet points starting with •. Be concise and actionable.
 
 News Articles:
 ${articlesContext}`;
