@@ -264,6 +264,15 @@ export default function Dashboard() {
             {showPagination && (
               <div className="flex justify-center items-center gap-2 mt-8">
                 <Button
+                  onClick={() => handlePageChange(1)}
+                  disabled={currentPage === 1 || loading}
+                  variant="outline"
+                  title="First page"
+                >
+                  First
+                </Button>
+                
+                <Button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1 || loading}
                   variant="outline"
@@ -304,6 +313,15 @@ export default function Dashboard() {
                   variant="outline"
                 >
                   Next
+                </Button>
+                
+                <Button
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={currentPage === totalPages || loading}
+                  variant="outline"
+                  title="Last page"
+                >
+                  Last
                 </Button>
               </div>
             )}
