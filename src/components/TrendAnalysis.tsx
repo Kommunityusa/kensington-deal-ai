@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, Target, AlertTriangle } from "lucide-react";
 
 interface TrendData {
   analysis_text: string;
@@ -70,14 +71,19 @@ export const TrendAnalysis = () => {
 
   if (!trendData) {
     return (
-      <div className="space-y-3">
-        <h3 className="text-lg md:text-xl font-semibold mb-4">Market Trends</h3>
+      <div className="space-y-4">
+        <h3 className="text-xl md:text-2xl font-bold">Market Trends</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="p-4 animate-pulse">
-              <div className="h-4 bg-muted rounded w-1/2 mb-3"></div>
-              <div className="h-3 bg-muted rounded w-full mb-2"></div>
-              <div className="h-3 bg-muted rounded w-3/4"></div>
+            <Card key={i} className="p-5 animate-pulse">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 bg-muted rounded-xl"></div>
+                <div className="h-4 bg-muted rounded w-1/2"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-3 bg-muted rounded w-full"></div>
+                <div className="h-3 bg-muted rounded w-3/4"></div>
+              </div>
             </Card>
           ))}
         </div>
@@ -85,41 +91,51 @@ export const TrendAnalysis = () => {
     );
   }
 
-  // Parse the 3 bullet points
+  // Parse the 3 bullet points and truncate if needed
   const bulletPoints = trendData.analysis_text
     .split('\n')
     .filter(line => line.trim())
-    .map(line => line.replace(/^[•\-]\s*/, '').trim())
+    .map(line => {
+      const cleaned = line.replace(/^[•\-]\s*/, '').trim();
+      // Truncate to ~60 characters max for cleaner display
+      return cleaned.length > 60 ? cleaned.substring(0, 60) + '...' : cleaned;
+    })
     .slice(0, 3);
 
   const cards = [
     {
       title: "Market Sentiment",
       icon: TrendingUp,
-      content: bulletPoints[0] || "Analyzing market direction...",
-      color: "primary"
+      content: bulletPoints[0] || "Analyzing...",
+      gradient: "from-blue-500/10 to-blue-500/5",
+      iconBg: "bg-blue-500/10",
+      iconColor: "text-blue-600"
     },
     {
       title: "Key Opportunity",
-      icon: TrendingUp,
-      content: bulletPoints[1] || "Identifying opportunities...",
-      color: "primary"
+      icon: Target,
+      content: bulletPoints[1] || "Analyzing...",
+      gradient: "from-green-500/10 to-green-500/5",
+      iconBg: "bg-green-500/10",
+      iconColor: "text-green-600"
     },
     {
       title: "Watch Out",
-      icon: AlertCircle,
-      content: bulletPoints[2] || "Assessing risks...",
-      color: "destructive"
+      icon: AlertTriangle,
+      content: bulletPoints[2] || "Analyzing...",
+      gradient: "from-orange-500/10 to-orange-500/5",
+      iconBg: "bg-orange-500/10",
+      iconColor: "text-orange-600"
     }
   ];
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2 mb-4">
-        <h3 className="text-lg md:text-xl font-semibold">Market Trends</h3>
-        <span className="ml-auto text-xs text-muted-foreground">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl md:text-2xl font-bold">Market Trends</h3>
+        <Badge variant="secondary" className="text-xs">
           {trendData.sentiment_summary}
-        </span>
+        </Badge>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {cards.map((card, idx) => {
@@ -127,19 +143,19 @@ export const TrendAnalysis = () => {
           return (
             <Card 
               key={idx} 
-              className="p-4 hover:shadow-lg transition-all border-l-4"
-              style={{ borderLeftColor: card.color === 'destructive' ? 'hsl(var(--destructive))' : 'hsl(var(--primary))' }}
+              className="relative overflow-hidden hover:shadow-md transition-all"
             >
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${card.color === 'destructive' ? 'bg-destructive/10' : 'bg-primary/10'} flex-shrink-0`}>
-                  <Icon className={`h-4 w-4 ${card.color === 'destructive' ? 'text-destructive' : 'text-primary'}`} />
+              <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-50`} />
+              <div className="relative p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`p-2.5 rounded-xl ${card.iconBg}`}>
+                    <Icon className={`h-5 w-5 ${card.iconColor}`} />
+                  </div>
+                  <h4 className="font-semibold text-sm">{card.title}</h4>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-sm mb-2">{card.title}</h4>
-                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                    {card.content}
-                  </p>
-                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {card.content}
+                </p>
               </div>
             </Card>
           );
