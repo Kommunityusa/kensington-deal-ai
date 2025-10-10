@@ -15,14 +15,14 @@ serve(async (req) => {
     console.log('Starting automated property scraping with Rentcast API');
 
     const RENTCAST_API_KEY = Deno.env.get('RENTCAST_API_KEY');
-    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
     
     if (!RENTCAST_API_KEY) {
       throw new Error('RENTCAST_API_KEY is not configured');
     }
     
-    if (!GOOGLE_MAPS_API_KEY) {
-      throw new Error('GOOGLE_MAPS_API_KEY is not configured');
+    if (!FIRECRAWL_API_KEY) {
+      throw new Error('FIRECRAWL_API_KEY is not configured');
     }
 
     const supabaseClient = createClient(
@@ -73,17 +73,52 @@ serve(async (req) => {
           try {
             totalScraped++;
             
-            // Log the listing structure to understand the data format
-            console.log('Rentcast listing sample:', JSON.stringify(listing).substring(0, 500));
-
             // Validate required fields
             if (!listing.addressLine1 || !listing.price || listing.price < 1000) {
               continue;
             }
 
-            // Generate Google Street View image URL
-            const fullAddress = `${listing.addressLine1}, ${listing.city || 'Philadelphia'}, ${listing.state || 'PA'} ${listing.zipCode || zipCode}`;
-            const imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(fullAddress)}&key=${GOOGLE_MAPS_API_KEY}`;
+            let imageUrl = null;
+
+            // Try to extract image from listing URL using Firecrawl
+            if (listing.url) {
+              try {
+                console.log(`Scraping listing URL with Firecrawl: ${listing.url}`);
+                const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    url: listing.url,
+                    formats: ['markdown', 'html'],
+                    onlyMainContent: true,
+                  }),
+                });
+
+                if (firecrawlResponse.ok) {
+                  const firecrawlData = await firecrawlResponse.json();
+                  
+                  // Extract image from metadata or HTML
+                  if (firecrawlData.data?.metadata?.ogImage) {
+                    imageUrl = firecrawlData.data.metadata.ogImage;
+                  } else if (firecrawlData.data?.html) {
+                    // Try to find the first property image in HTML
+                    const imgMatch = firecrawlData.data.html.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+                    if (imgMatch && imgMatch[1]) {
+                      imageUrl = imgMatch[1];
+                    }
+                  }
+                  
+                  if (imageUrl) {
+                    console.log(`Found image via Firecrawl: ${imageUrl}`);
+                  }
+                }
+              } catch (firecrawlError) {
+                console.error(`Firecrawl error for ${listing.url}:`, firecrawlError);
+              }
+            }
 
             // Map Rentcast data to our schema
             const property = {
