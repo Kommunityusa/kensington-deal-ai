@@ -29,9 +29,11 @@ serve(async (req) => {
     
     let totalScraped = 0;
     let totalInserted = 0;
+    const MAX_PROPERTIES = 50;
 
     // Fetch properties from Rentcast API for each zip code
     for (const zipCode of kensingtonZips) {
+      if (totalScraped >= MAX_PROPERTIES) break;
       try {
         console.log(`Fetching properties for zip code ${zipCode} from Rentcast...`);
         
@@ -39,7 +41,8 @@ serve(async (req) => {
         const rentcastUrl = new URL('https://api.rentcast.io/v1/listings/sale');
         rentcastUrl.searchParams.append('zipCode', zipCode);
         rentcastUrl.searchParams.append('status', 'Active');
-        rentcastUrl.searchParams.append('limit', '100');
+        const remainingLimit = Math.min(50, MAX_PROPERTIES - totalScraped);
+        rentcastUrl.searchParams.append('limit', remainingLimit.toString());
 
         const response = await fetch(rentcastUrl.toString(), {
           method: 'GET',
@@ -59,6 +62,8 @@ serve(async (req) => {
 
         // Process each listing
         for (const listing of listings || []) {
+          if (totalScraped >= MAX_PROPERTIES) break;
+          
           try {
             totalScraped++;
 

@@ -33,6 +33,11 @@ export default function Navigation({ user }: NavigationProps) {
                 Properties
               </Button>
             </Link>
+            <Link to="/news">
+              <Button variant="ghost" size="sm">
+                News
+              </Button>
+            </Link>
             {user && (
               <Link to="/list-property">
                 <Button variant="ghost" size="sm">

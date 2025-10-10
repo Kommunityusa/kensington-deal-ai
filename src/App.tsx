@@ -10,6 +10,7 @@ import PropertyDetails from "./pages/PropertyDetails";
 import ListProperty from "./pages/ListProperty";
 import Checkout from "./pages/Checkout";
 import About from "./pages/About";
+import News from "./pages/News";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/list-property" element={<ListProperty />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/about" element={<About />} />
+          <Route path="/news" element={<News />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
