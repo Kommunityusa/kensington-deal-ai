@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.fetch-kensington-news]
 verify_jwt = false
+
+[functions.fetch-news-images]
+verify_jwt = false

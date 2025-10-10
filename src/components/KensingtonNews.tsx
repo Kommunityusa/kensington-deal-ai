@@ -10,6 +10,7 @@ interface NewsArticle {
   description: string;
   source: string;
   publishedAt: string;
+  imageUrl?: string;
 }
 
 export const KensingtonNews = () => {
@@ -23,15 +24,28 @@ export const KensingtonNews = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('fetch-kensington-news');
+      
+      // Fetch news articles from database
+      const { data, error } = await supabase
+        .from('news_articles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(15);
 
       if (error) {
         console.error('Error fetching news:', error);
         return;
       }
 
-      if (data?.success && data?.articles) {
-        setArticles(data.articles);
+      if (data) {
+        setArticles(data.map(article => ({
+          title: article.title,
+          url: article.url,
+          description: article.description || '',
+          source: article.source || '',
+          publishedAt: article.published_at || '',
+          imageUrl: article.image_url || '',
+        })));
       }
     } catch (error) {
       console.error('Error:', error);
@@ -80,7 +94,16 @@ export const KensingtonNews = () => {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
+            <Card key={index} className="hover:shadow-lg transition-shadow overflow-hidden">
+              {article.imageUrl && (
+                <div className="w-full h-48 overflow-hidden">
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <CardHeader>
                 <CardTitle className="text-lg line-clamp-2">
                   {article.title}
