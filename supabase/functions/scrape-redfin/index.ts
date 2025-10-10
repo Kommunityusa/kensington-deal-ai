@@ -26,7 +26,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Starting Zillow scraping with Firecrawl');
+    console.log('Starting Redfin scraping with Firecrawl');
 
     const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
     if (!FIRECRAWL_API_KEY) {
@@ -39,88 +39,47 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Scrape Zillow Kensington Philadelphia properties for sale
-    const zillowUrl = 'https://www.zillow.com/philadelphia-pa/kensington/';
+    // Scrape Redfin Kensington Philadelphia properties for sale
+    const redfinUrl = 'https://www.redfin.com/neighborhood/174716/PA/Philadelphia/Kensington/filter/property-type=house+condo+townhouse,include=forsale';
     
-    console.log(`Crawling Zillow Kensington: ${zillowUrl}`);
+    console.log(`Scraping Redfin Kensington: ${redfinUrl}`);
 
-    const crawlResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
+    const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        url: zillowUrl,
-        limit: 100, // Increase limit for more Kensington properties
-        scrapeOptions: {
-          formats: ['markdown', 'html'],
-          onlyMainContent: true,
-          includeTags: ['.property-card', '.list-card', '.result-list', '.search-result'],
-          excludeTags: ['nav', 'footer', 'header', '.ad', '.advertisement']
-        },
-        maxDepth: 3 // Crawl deeper for more listings
+        url: redfinUrl,
+        formats: ['markdown', 'html'],
+        onlyMainContent: true,
+        waitFor: 3000, // Wait for dynamic content to load
+        includeTags: ['.HomeCardContainer', '.HomeCard', '.bp-Homecard', '[data-rf-test-id="home-card"]', '.homecards'],
+        excludeTags: ['nav', 'footer', 'header', '.ad', '.advertisement', 'script', 'style']
       })
     });
 
-    if (!crawlResponse.ok) {
-      const errorText = await crawlResponse.text();
-      throw new Error(`Firecrawl API error (${crawlResponse.status}): ${errorText}`);
+    if (!scrapeResponse.ok) {
+      const errorText = await scrapeResponse.text();
+      throw new Error(`Firecrawl API error (${scrapeResponse.status}): ${errorText}`);
     }
 
-    const crawlData = await crawlResponse.json();
-    console.log('Firecrawl crawl initiated:', crawlData);
+    const scrapeData = await scrapeResponse.json();
+    console.log('Firecrawl scrape completed');
 
-    // Check crawl status
-    const jobId = crawlData.id;
-    if (!jobId) {
-      throw new Error('No job ID returned from Firecrawl');
+    if (!scrapeData.success || !scrapeData.data) {
+      throw new Error('No data returned from Firecrawl');
     }
 
-    // Poll for completion (max 2 minutes)
-    let crawlComplete = false;
-    let attempts = 0;
-    let documents: FirecrawlDocument[] = [];
-
-    while (!crawlComplete && attempts < 24) { // 24 * 5 seconds = 2 minutes
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
-      
-      const statusResponse = await fetch(`https://api.firecrawl.dev/v1/crawl/${jobId}`, {
-        headers: {
-          'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-        }
-      });
-
-      if (!statusResponse.ok) {
-        throw new Error(`Failed to check crawl status: ${statusResponse.status}`);
-      }
-
-      const statusData = await statusResponse.json();
-      console.log(`Crawl status (attempt ${attempts + 1}):`, statusData.status);
-
-      if (statusData.status === 'completed') {
-        crawlComplete = true;
-        documents = statusData.data || [];
-      } else if (statusData.status === 'failed') {
-        throw new Error('Crawl failed');
-      }
-
-      attempts++;
-    }
-
-    if (!crawlComplete) {
-      throw new Error('Crawl timed out after 2 minutes');
-    }
-
-    console.log(`Received ${documents.length} documents from Firecrawl`);
+    const document: FirecrawlDocument = scrapeData.data;
+    console.log(`Processing scraped content from Redfin`);
 
     // Parse property data from scraped content using Lovable AI
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const properties = [];
 
-    for (const doc of documents.slice(0, 30)) { // Process first 30 documents for Kensington
-      if (!doc.markdown) continue;
-
+    if (document.markdown) {
       try {
         const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -133,11 +92,11 @@ serve(async (req) => {
             messages: [
               {
                 role: "system",
-                content: "You are a property data extraction expert. Extract property information from the provided content."
+                content: "You are a property data extraction expert. Extract property information from Redfin listings."
               },
               {
                 role: "user",
-                content: `Extract property data from this Kensington, Philadelphia content. Return ONLY a JSON array of properties, each with: address, price (number), bedrooms (number), bathrooms (number), square_feet (number), property_type, description, year_built (number or null), listing_url, zip_code. If no properties found, return empty array [].\n\n${doc.markdown.slice(0, 3000)}`
+                content: `Extract property data from this Redfin Kensington, Philadelphia content. Return ONLY a JSON array of properties, each with: address, price (number), bedrooms (number), bathrooms (number), square_feet (number), property_type, description, year_built (number or null), listing_url, zip_code. If no properties found, return empty array [].\n\n${document.markdown.slice(0, 5000)}`
               }
             ],
             tools: [{
@@ -160,7 +119,8 @@ serve(async (req) => {
                           property_type: { type: "string" },
                           description: { type: "string" },
                           year_built: { type: ["number", "null"] },
-                          zip_code: { type: "string" },
+                          listing_url: { type: "string" },
+                          zip_code: { type: "string" }
                         },
                         required: ["address", "price"]
                       }
@@ -198,7 +158,7 @@ serve(async (req) => {
         const { error } = await supabaseClient
           .from('properties')
           .insert({
-            external_id: `zillow-scraped-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+            external_id: `redfin-scraped-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             address: prop.address,
             city: 'Philadelphia',
             state: 'PA',
@@ -211,7 +171,7 @@ serve(async (req) => {
             listing_url: prop.listing_url || '',
             description: prop.description || '',
             year_built: prop.year_built || null,
-            source: 'zillow-scraped',
+            source: 'redfin-scraped',
             last_verified_at: new Date().toISOString(),
             is_active: true
           });
@@ -224,12 +184,11 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Successfully inserted ${insertedCount} properties from Zillow scrape`);
+    console.log(`Successfully inserted ${insertedCount} properties from Redfin scrape`);
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: `Scraped and processed Zillow data`,
-      documentsScraped: documents.length,
+      message: `Scraped and processed Redfin data`,
       propertiesExtracted: properties.length,
       propertiesInserted: insertedCount
     }), {
@@ -237,7 +196,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in scrape-zillow function:', error);
+    console.error('Error in scrape-redfin function:', error);
     return new Response(JSON.stringify({ 
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
