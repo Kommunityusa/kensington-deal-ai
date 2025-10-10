@@ -122,30 +122,6 @@ export default function Dashboard() {
     setLoading(false);
   };
 
-  const fetchPhillyOPAProperties = async () => {
-    setLoading(true);
-    toast.info("Fetching from Philadelphia public records...");
-    console.log('Fetching from Philadelphia OPA database');
-    try {
-      const { data, error } = await supabase.functions.invoke('fetch-philly-properties');
-
-      console.log('Philly OPA response:', { data, error });
-
-      if (error) {
-        console.error("Error fetching Philly OPA properties:", error);
-        toast.error(`Failed to fetch public records: ${error.message}`);
-      } else {
-        toast.success(`✓ ${data.message || 'Philadelphia public records fetched successfully'}`);
-        // Refresh the properties list
-        await fetchProperties();
-      }
-    } catch (error) {
-      console.error("Error calling fetch-philly-properties function:", error);
-      toast.error("Failed to fetch Philadelphia public records.");
-    }
-    setLoading(false);
-  };
-
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
