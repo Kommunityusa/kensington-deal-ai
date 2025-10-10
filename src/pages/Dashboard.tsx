@@ -120,7 +120,7 @@ export default function Dashboard() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1">
-              <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center gap-4 mb-2">
                 <h1 className="text-4xl font-bold">Kensington Investment Opportunities</h1>
                 <Button
                   onClick={() => {
@@ -133,6 +133,23 @@ export default function Dashboard() {
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Refresh
+                </Button>
+                <Button
+                  onClick={async () => {
+                    toast.info("Updating property images...");
+                    const { data, error } = await supabase.functions.invoke('update-property-images');
+                    if (error) {
+                      toast.error("Failed to update images");
+                    } else {
+                      toast.success(`Updated ${data.updated} property images!`);
+                      fetchProperties();
+                    }
+                  }}
+                  variant="secondary"
+                  size="sm"
+                  disabled={loading}
+                >
+                  Update Images
                 </Button>
               </div>
               <p className="text-muted-foreground">Free property listings for Philadelphia&apos;s Kensington neighborhood</p>
