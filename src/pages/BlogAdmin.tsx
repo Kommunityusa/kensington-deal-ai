@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
+import TriggerBlogGeneration from "@/components/TriggerBlogGeneration";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,10 +120,12 @@ export default function BlogAdmin() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation user={user} />
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
+        <TriggerBlogGeneration />
+        
         <Card>
           <CardHeader>
-            <CardTitle>Create Blog Post</CardTitle>
+            <CardTitle>Create Blog Post Manually</CardTitle>
             <CardDescription>
               Use AI to generate SEO-optimized content for your real estate blog
             </CardDescription>
