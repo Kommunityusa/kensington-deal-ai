@@ -11,6 +11,9 @@ import ListProperty from "./pages/ListProperty";
 import Checkout from "./pages/Checkout";
 import About from "./pages/About";
 import News from "./pages/News";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
+import BlogAdmin from "./pages/BlogAdmin";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
@@ -32,6 +35,9 @@ const App = () => (
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/about" element={<About />} />
           <Route path="/news" element={<News />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/blog-admin" element={<BlogAdmin />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="*" element={<NotFound />} />

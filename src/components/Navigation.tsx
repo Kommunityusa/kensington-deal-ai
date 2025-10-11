@@ -43,6 +43,11 @@ export default function Navigation({ user }: NavigationProps) {
               News
             </Button>
           </Link>
+          <Link to="/blog">
+            <Button variant="ghost" size="sm">
+              Blog
+            </Button>
+          </Link>
           {user && (
             <Link to="/list-property">
               <Button variant="ghost" size="sm">
@@ -92,6 +97,12 @@ export default function Navigation({ user }: NavigationProps) {
               <Link to="/news" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="ghost" className="w-full justify-start" size="lg">
                   News
+                </Button>
+              </Link>
+              
+              <Link to="/blog" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start" size="lg">
+                  Blog
                 </Button>
               </Link>
               
