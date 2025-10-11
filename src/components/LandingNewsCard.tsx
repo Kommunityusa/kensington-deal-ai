@@ -17,7 +17,8 @@ export default function LandingNewsCard({ article }: LandingNewsCardProps) {
   };
 
   const handleClick = () => {
-    window.open(article.url, '_blank', 'noopener,noreferrer');
+    // Redirect to auth page instead of external link
+    window.location.href = '/auth';
   };
 
   return (
@@ -42,7 +43,7 @@ export default function LandingNewsCard({ article }: LandingNewsCardProps) {
             </div>
           )}
           <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="backdrop-blur-sm bg-background/90">
+            <Badge variant="default" className="bg-background/95 text-foreground border border-border shadow-lg backdrop-blur-sm font-medium">
               {article.source || 'News'}
             </Badge>
           </div>
