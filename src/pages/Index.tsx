@@ -13,6 +13,13 @@ import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { OrganizationStructuredData, LocalBusinessStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 
+import propertyPlaceholder1 from "@/assets/property-placeholder-1.jpg";
+import propertyPlaceholder2 from "@/assets/property-placeholder-2.jpg";
+import propertyPlaceholder3 from "@/assets/property-placeholder-3.jpg";
+import propertyPlaceholder4 from "@/assets/property-placeholder-4.jpg";
+import propertyPlaceholder5 from "@/assets/property-placeholder-5.jpg";
+import propertyPlaceholder6 from "@/assets/property-placeholder-6.jpg";
+
 const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
@@ -52,6 +59,15 @@ const Index = () => {
   };
 
   const fetchProperties = async () => {
+    const placeholderImages = [
+      propertyPlaceholder1,
+      propertyPlaceholder2,
+      propertyPlaceholder3,
+      propertyPlaceholder4,
+      propertyPlaceholder5,
+      propertyPlaceholder6,
+    ];
+
     try {
       const { data, error } = await supabase
         .from('properties')
@@ -65,7 +81,12 @@ const Index = () => {
       }
 
       if (data) {
-        setProperties(data);
+        // Add placeholder images to properties
+        const propertiesWithImages = data.map((property, index) => ({
+          ...property,
+          image_url: property.image_url || placeholderImages[index % placeholderImages.length]
+        }));
+        setProperties(propertiesWithImages);
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
