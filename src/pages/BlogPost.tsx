@@ -8,7 +8,7 @@ import { ArticleStructuredData, BreadcrumbStructuredData } from "@/components/St
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BlogPost() {
@@ -109,117 +109,101 @@ export default function BlogPost() {
       
       <Navigation user={user} />
       
-      <main className="flex-1">
-        {/* Hero Section with Featured Image */}
-        {post.featured_image_url && (
-          <div className="relative h-[400px] bg-muted overflow-hidden">
-            <img
-              src={post.featured_image_url}
-              alt={post.title}
-              className="w-full h-full object-cover"
-              loading="eager"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          </div>
-        )}
-
-        <article className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="flex-1 bg-background">
+        <article className="container mx-auto px-4 py-12 max-w-4xl">
           {/* Back Button */}
           <Button 
             variant="ghost" 
             onClick={() => navigate("/blog")}
-            className="mb-8 -ml-3"
+            className="mb-12 -ml-3 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Blog
           </Button>
 
-          {/* Article Header */}
-          <header className={`mb-16 ${post.featured_image_url ? '-mt-32 relative z-10' : ''}`}>
-            <div className="space-y-8">
-              {/* Category Badge */}
-              {post.category && (
-                <Badge variant="secondary" className="text-base px-6 py-2">
+          {/* Article Header - Clean & Simple */}
+          <header className="mb-16 space-y-8">
+            {/* Category Badge */}
+            {post.category && (
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
+                  <BookOpen className="h-4 w-4 text-primary" />
+                </div>
+                <span className="text-primary font-medium text-sm">
                   {post.category}
-                </Badge>
-              )}
-              
-              {/* Title */}
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                {post.title}
-              </h1>
-              
-              {/* Excerpt */}
-              {post.excerpt && (
-                <p className="text-xl text-muted-foreground leading-relaxed">
-                  {post.excerpt}
-                </p>
-              )}
-
-              {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground pt-4 border-t">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="font-medium">{post.author}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
-                </div>
-                {post.read_time_minutes && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>{post.read_time_minutes} min read</span>
-                  </div>
-                )}
+                </span>
               </div>
+            )}
+            
+            {/* Title */}
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] text-foreground">
+              {post.title}
+            </h1>
 
-              {/* Tags */}
-              {post.tags && post.tags.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-4">
-                  {post.tags.map((tag: string) => (
-                    <Badge key={tag} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
+            {/* Meta Information - Single Row */}
+            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>{post.author}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
+              </div>
+              {post.read_time_minutes && (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  <span>{post.read_time_minutes} min read</span>
                 </div>
               )}
             </div>
           </header>
 
-          <Separator className="mb-16" />
-
-          {/* Article Content */}
+          {/* Article Content with Better Spacing */}
           <div 
-            className="prose prose-xl dark:prose-invert max-w-none
-              prose-headings:font-bold prose-headings:tracking-tight
-              prose-h2:text-4xl prose-h2:mt-20 prose-h2:mb-10 prose-h2:scroll-mt-20
-              prose-h3:text-3xl prose-h3:mt-16 prose-h3:mb-8 prose-h3:scroll-mt-20
-              prose-p:text-xl prose-p:leading-[1.8] prose-p:mb-10 prose-p:text-foreground/90
-              prose-ul:my-10 prose-ul:space-y-4 prose-li:my-3 prose-li:text-xl prose-li:leading-relaxed
-              prose-ol:my-10 prose-ol:space-y-4
-              prose-strong:text-foreground prose-strong:font-bold
-              prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
-              prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:my-10
-              prose-img:rounded-lg prose-img:shadow-lg prose-img:my-12
+            className="prose prose-lg dark:prose-invert max-w-none
+              prose-headings:font-bold prose-headings:text-foreground prose-headings:tracking-tight
+              prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:font-bold
+              prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:font-semibold
+              prose-p:text-lg prose-p:leading-[1.8] prose-p:mb-8 prose-p:text-muted-foreground
+              prose-ul:my-8 prose-ul:space-y-3 prose-li:text-muted-foreground prose-li:leading-relaxed
+              prose-ol:my-8 prose-ol:space-y-3
+              prose-strong:text-foreground prose-strong:font-semibold
+              prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:transition-all
+              prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-muted/30 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r prose-blockquote:not-italic prose-blockquote:my-8
+              prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm
+              prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-lg prose-pre:my-8
+              prose-img:rounded-lg prose-img:shadow-md prose-img:my-12 prose-img:mx-auto
               prose-hr:my-12 prose-hr:border-border"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
-          {/* Article Footer */}
-          <div className="mt-16 pt-8 border-t space-y-8">
-            {/* Call to Action */}
-            <div className="bg-primary/5 rounded-lg p-8 text-center">
-              <h3 className="text-2xl font-bold mb-3">Ready to Start Investing?</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Explore investment opportunities in Philadelphia's Kensington neighborhood
+          {/* Tags Section */}
+          {post.tags && post.tags.length > 0 && (
+            <div className="mt-16 pt-8 border-t">
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag: string) => (
+                  <Badge key={tag} variant="secondary" className="text-sm px-4 py-1.5 font-normal">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Article Footer - CTA */}
+          <div className="mt-16 pt-8 border-t">
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-10 text-center border border-primary/10">
+              <h3 className="text-3xl font-bold mb-4 text-foreground">Ready to Start Investing in Kensington?</h3>
+              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Explore curated investment opportunities with detailed analysis and market insights
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Button size="lg" asChild>
+                <Button size="lg" className="px-8" asChild>
                   <a href="/dashboard">Browse Properties</a>
                 </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="/about">Learn More</a>
+                <Button size="lg" variant="outline" className="px-8" asChild>
+                  <a href="/about">Learn More About Us</a>
                 </Button>
               </div>
             </div>
