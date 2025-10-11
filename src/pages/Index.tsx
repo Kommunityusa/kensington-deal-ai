@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown, GraduationCap, BookOpen } from "lucide-react";
+import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown, GraduationCap, BookOpen, UserPlus, FileSearch, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingNewsCard from "@/components/LandingNewsCard";
@@ -148,6 +148,64 @@ const Index = () => {
       {/* Trend Analysis Section */}
       <section className="container mx-auto px-4 py-12">
         <TrendAnalysis />
+      </section>
+
+      {/* How It Works Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+          <p className="text-muted-foreground text-lg">Start your investment journey in three simple steps</p>
+        </div>
+        
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          {/* Step 1 */}
+          <div className="text-center space-y-4 animate-fade-in">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <UserPlus className="h-8 w-8 text-primary" />
+            </div>
+            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
+              Step 1
+            </div>
+            <h3 className="text-xl font-bold">Create Free Account</h3>
+            <p className="text-muted-foreground">
+              Sign up in seconds - no credit card required. Get instant access to all market data and educational resources.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <FileSearch className="h-8 w-8 text-primary" />
+            </div>
+            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
+              Step 2
+            </div>
+            <h3 className="text-xl font-bold">Explore Properties</h3>
+            <p className="text-muted-foreground">
+              Browse 500+ Kensington properties with detailed analytics, market trends, and ROI calculations tailored for beginners.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <CheckCircle className="h-8 w-8 text-primary" />
+            </div>
+            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
+              Step 3
+            </div>
+            <h3 className="text-xl font-bold">Make Informed Decisions</h3>
+            <p className="text-muted-foreground">
+              Use our analysis tools and educational guides to evaluate properties and make confident investment choices.
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center mt-12">
+          <Button size="lg" variant="hero" asChild>
+            <Link to="/auth">Get Started Now</Link>
+          </Button>
+        </div>
       </section>
 
       {/* Free Access Section */}
