@@ -34,7 +34,7 @@ export default function PropertyCard({ property, isPremium = false }: PropertyCa
           {property.image_url ? (
             <img
               src={property.image_url}
-              alt={property.address}
+              alt={`Investment property at ${property.address} - ${property.bedrooms} bed, ${property.bathrooms} bath, ${property.square_feet} sqft`}
               className="w-full h-full object-cover"
               loading="lazy"
               onError={(e) => {

@@ -9,6 +9,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ArrowLeft, MapPin, Bed, Bath, Home, TrendingUp, DollarSign, Calendar, Ruler, Building2, LogOut, AlertTriangle, Info } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
+import { PropertyStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -149,6 +151,22 @@ export default function PropertyDetails() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title={`${property.address}, ${property.city} - ${formatCurrency(property.price)} | Kensington Deals`}
+        description={property.description || `Investment property at ${property.address}, ${property.city}, ${property.state}. ${property.bedrooms} bed, ${property.bathrooms} bath, ${property.square_feet} sqft. View detailed investment analysis and ROI calculations.`}
+        keywords={`${property.address}, ${property.city} real estate, Philadelphia investment property, Kensington property, ${property.property_type}`}
+        image={property.image_url}
+        url={`/property/${property.id}`}
+        type="product"
+      />
+      <PropertyStructuredData property={property} />
+      <BreadcrumbStructuredData 
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Dashboard', url: '/dashboard' },
+          { name: property.address, url: `/property/${property.id}` }
+        ]}
+      />
       <nav className="border-b bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -179,8 +197,9 @@ export default function PropertyDetails() {
               {property.image_url ? (
                 <img
                   src={property.image_url}
-                  alt={property.address}
+                  alt={`Investment property at ${property.address}, ${property.city}, ${property.state} - ${property.bedrooms} bed, ${property.bathrooms} bath`}
                   className="w-full h-full object-cover"
+                  loading="eager"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full">

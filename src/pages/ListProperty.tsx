@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
+import { SEO } from "@/components/SEO";
+import { BreadcrumbStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,6 +84,18 @@ export default function ListProperty() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="List Your Kensington Property | Free Property Listings | Kensington Deals"
+        description="List your Kensington Philadelphia property for free. Reach qualified real estate investors looking for investment opportunities in zip codes 19125, 19134, 19122, and 19137."
+        keywords="list property Kensington, sell property Philadelphia, free property listing, Kensington real estate, Philadelphia property for sale"
+        url="/list-property"
+      />
+      <BreadcrumbStructuredData 
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'List Property', url: '/list-property' }
+        ]}
+      />
       <Navigation user={null} />
       <main className="container mx-auto px-4 py-8 max-w-3xl">
         <Card>
