@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
+import PropertyNotificationSettings from "@/components/PropertyNotificationSettings";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
 import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
@@ -190,6 +191,10 @@ export default function Dashboard() {
         </Card>
 
         <PropertyFilters filters={filters} setFilters={setFilters} />
+
+        <div className="mb-6">
+          <PropertyNotificationSettings />
+        </div>
 
         {error && (
           <Alert variant="destructive" className="mb-6">
