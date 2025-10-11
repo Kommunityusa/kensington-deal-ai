@@ -7,7 +7,7 @@ import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown, G
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingNewsCard from "@/components/LandingNewsCard";
-import { TrendAnalysis } from "@/components/TrendAnalysis";
+
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { OrganizationStructuredData, LocalBusinessStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
@@ -143,11 +143,6 @@ const Index = () => {
             <Link to="/news">View All News</Link>
           </Button>
         </div>
-      </section>
-
-      {/* Trend Analysis Section */}
-      <section className="container mx-auto px-4 py-12">
-        <TrendAnalysis />
       </section>
 
       {/* How It Works Section */}
