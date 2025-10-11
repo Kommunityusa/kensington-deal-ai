@@ -1,7 +1,7 @@
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Building2, LogOut, Plus, Home, Menu, X } from "lucide-react";
+import { Building2, LogOut, Plus, Home, Menu, X, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -49,12 +49,20 @@ export default function Navigation({ user }: NavigationProps) {
             </Button>
           </Link>
           {user && (
-            <Link to="/list-property">
-              <Button variant="ghost" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                List Property
-              </Button>
-            </Link>
+            <>
+              <Link to="/settings">
+                <Button variant="ghost" size="sm">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
+              <Link to="/list-property">
+                <Button variant="ghost" size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  List Property
+                </Button>
+              </Link>
+            </>
           )}
           
           {user ? (
@@ -107,12 +115,20 @@ export default function Navigation({ user }: NavigationProps) {
               </Link>
               
               {user && (
-                <Link to="/list-property" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start" size="lg">
-                    <Plus className="h-5 w-5 mr-3" />
-                    List Property
-                  </Button>
-                </Link>
+                <>
+                  <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start" size="lg">
+                      <Settings className="h-5 w-5 mr-3" />
+                      Settings
+                    </Button>
+                  </Link>
+                  <Link to="/list-property" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start" size="lg">
+                      <Plus className="h-5 w-5 mr-3" />
+                      List Property
+                    </Button>
+                  </Link>
+                </>
               )}
               
               <div className="pt-4 border-t mt-auto">
