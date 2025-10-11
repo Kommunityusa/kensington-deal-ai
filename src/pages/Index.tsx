@@ -207,7 +207,7 @@ const Index = () => {
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">100% Free for First-Time Investors</h2>
-          <p className="text-muted-foreground text-lg">All educational tools and market data - no credit card required</p>
+          <p className="text-muted-foreground text-lg">Learn to invest in real estate with confidence - no experience or credit card required</p>
         </div>
         
         <Card className="max-w-2xl mx-auto hover-scale border-2 border-primary">
@@ -221,38 +221,38 @@ const Index = () => {
               <span className="text-muted-foreground text-xl">/month</span>
             </div>
             <CardDescription className="mt-2 text-base">
-              Everything you need to start your real estate investment journey
+              Master real estate investing with tools designed for beginners
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Browse 50+ Kensington property listings</span>
+                <span className="font-medium">Discover profitable deals with 50+ curated Kensington properties</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Automated ROI calculations & investment grades</span>
+                <span className="font-medium">Instantly calculate ROI and potential profits on any property</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Property filtering by price and type</span>
+                <span className="font-medium">Find properties that match your budget and investment goals</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Detailed financial breakdowns & profit projections</span>
+                <span className="font-medium">Understand the real costs and profit potential before you invest</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Real-time Kensington market news & updates</span>
+                <span className="font-medium">Stay ahead with daily Kensington market trends and news</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Educational blog posts & investment guides</span>
+                <span className="font-medium">Learn from expert guides written for first-time investors</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Market analysis & risk assessments</span>
+                <span className="font-medium">Make smarter decisions with professional risk assessments</span>
               </li>
             </ul>
             <Button variant="hero" size="lg" className="w-full" asChild>
