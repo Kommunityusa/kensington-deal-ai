@@ -17,7 +17,6 @@ serve(async (req) => {
     const FIRECRAWL_API_KEY = Deno.env.get('FIRECRAWL_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
 
     if (!FIRECRAWL_API_KEY) {
       throw new Error('FIRECRAWL_API_KEY is not configured');
@@ -46,51 +45,55 @@ serve(async (req) => {
       try {
         let imageUrl = null;
 
-        // Try Google Street View if we have API key
-        if (GOOGLE_MAPS_API_KEY && property.address && property.city && property.state && property.zip_code) {
-          const streetAddress = `${property.address}, ${property.city}, ${property.state} ${property.zip_code}`;
-          imageUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x600&location=${encodeURIComponent(streetAddress)}&key=${GOOGLE_MAPS_API_KEY}`;
+        // Try to scrape listing URL with Firecrawl
+        if (property.listing_url) {
+          console.log(`Scraping ${property.listing_url} for property ${property.address}`);
           
-          // Verify the Street View image exists
-          const checkResponse = await fetch(imageUrl);
-          if (!checkResponse.ok) {
-            imageUrl = null;
-          }
-        }
+          const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+            },
+            body: JSON.stringify({
+              url: property.listing_url,
+              formats: ['html'],
+            }),
+          });
 
-        // If Street View didn't work, try to scrape listing URL with Firecrawl
-        if (!imageUrl && property.listing_url) {
-          try {
-            const scrapeResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
-              },
-              body: JSON.stringify({
-                url: property.listing_url,
-                formats: ['html'],
-              }),
-            });
+          if (scrapeResponse.ok) {
+            const scrapeData = await scrapeResponse.json();
+            const html = scrapeData.data?.html || '';
 
-            if (scrapeResponse.ok) {
-              const scrapeData = await scrapeResponse.json();
-              const html = scrapeData.data?.html || '';
-
-              // Look for og:image meta tag
-              const ogImageMatch = html.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/i);
-              if (ogImageMatch) {
-                imageUrl = ogImageMatch[1];
+            // Look for og:image meta tag first (usually best quality)
+            const ogImageMatch = html.match(/<meta\s+(?:property|name)="og:image"\s+content="([^"]+)"/i);
+            if (ogImageMatch) {
+              imageUrl = ogImageMatch[1];
+              console.log(`Found og:image: ${imageUrl}`);
+            } else {
+              // Look for twitter:image as fallback
+              const twitterImageMatch = html.match(/<meta\s+(?:property|name)="twitter:image"\s+content="([^"]+)"/i);
+              if (twitterImageMatch) {
+                imageUrl = twitterImageMatch[1];
+                console.log(`Found twitter:image: ${imageUrl}`);
               } else {
-                // Look for first img tag with property-related class
-                const imgMatch = html.match(/<img[^>]*(?:class="[^"]*(?:property|listing|photo)[^"]*")[^>]*src="([^"]+)"/i);
+                // Look for first img tag with property-related attributes
+                const imgMatch = html.match(/<img[^>]*(?:class="[^"]*(?:property|listing|photo|hero|main)[^"]*"|id="[^"]*(?:property|listing|photo|hero|main)[^"]*")[^>]*src="([^"]+)"/i);
                 if (imgMatch) {
                   imageUrl = imgMatch[1];
+                  console.log(`Found image from img tag: ${imageUrl}`);
+                } else {
+                  // Last resort: get first img with reasonable size
+                  const anyImgMatch = html.match(/<img[^>]*src="([^"]+)"[^>]*(?:width|height)="[5-9]\d{2,}"/i);
+                  if (anyImgMatch) {
+                    imageUrl = anyImgMatch[1];
+                    console.log(`Found fallback image: ${imageUrl}`);
+                  }
                 }
               }
             }
-          } catch (scrapeError) {
-            console.error(`Error scraping ${property.listing_url}:`, scrapeError);
+          } else {
+            console.error(`Failed to scrape ${property.listing_url}, status: ${scrapeResponse.status}`);
           }
         }
 
@@ -105,11 +108,13 @@ serve(async (req) => {
             console.error(`Error updating property ${property.id}:`, updateError);
           } else {
             updated++;
-            console.log(`Updated image for: ${property.address}`);
+            console.log(`✓ Updated image for: ${property.address}`);
           }
+        } else {
+          console.log(`✗ No image found for: ${property.address}`);
         }
 
-        // Rate limiting
+        // Rate limiting - be nice to Firecrawl API
         await new Promise(resolve => setTimeout(resolve, 1000));
 
       } catch (error) {
@@ -117,7 +122,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Updated ${updated} property images`);
+    console.log(`Completed: Updated ${updated} out of ${properties?.length || 0} properties`);
 
     return new Response(
       JSON.stringify({
