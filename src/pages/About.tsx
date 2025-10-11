@@ -2,10 +2,23 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
+import { OrganizationStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 
 const About = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
+      <SEO 
+        title="About Kensington Deals - Philadelphia Real Estate Investment Platform"
+        description="Learn about Kensington Deals, a Philadelphia real estate investment platform built by Connex II Inc. Our mission is to empower first-time investors in the Kensington neighborhood."
+        keywords="about Kensington Deals, Connex II Inc, Philadelphia venture studio, real estate platform, Kensington investment, kommunity.app, cashflowai.biz, referredai.org"
+        url="/about"
+      />
+      <OrganizationStructuredData />
+      <BreadcrumbStructuredData items={[
+        { name: "Home", url: "/" },
+        { name: "About", url: "/about" }
+      ]} />
       {/* Navigation */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

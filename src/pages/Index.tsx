@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import LandingNewsCard from "@/components/LandingNewsCard";
 import { TrendAnalysis } from "@/components/TrendAnalysis";
 import Footer from "@/components/Footer";
+import { SEO } from "@/components/SEO";
+import { OrganizationStructuredData, LocalBusinessStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 
 const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
@@ -48,6 +50,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <SEO 
+        title="Kensington Deals - Philadelphia Real Estate Investment for First-Time Investors"
+        description="Discover investment opportunities in Philadelphia's Kensington neighborhood. Free property listings, ROI analysis, market trends, and educational resources for first-time real estate investors."
+        keywords="Philadelphia real estate, Kensington properties, real estate investment, property listings Philadelphia, first-time investors, Kensington neighborhood, investment properties, Philadelphia housing market"
+        url="/"
+      />
+      <OrganizationStructuredData />
+      <LocalBusinessStructuredData />
+      <BreadcrumbStructuredData items={[{ name: "Home", url: "/" }]} />
       {/* Navigation */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

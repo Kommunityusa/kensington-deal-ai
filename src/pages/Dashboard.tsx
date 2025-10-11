@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
+import { SEO } from "@/components/SEO";
+import { BreadcrumbStructuredData } from "@/components/StructuredData";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -110,6 +112,16 @@ export default function Dashboard() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background">
+        <SEO 
+          title="Property Dashboard - Kensington Real Estate Listings"
+          description="Browse investment properties in Philadelphia's Kensington neighborhood. Filter by price, property type, and view detailed ROI analysis."
+          keywords="property dashboard, Kensington listings, Philadelphia properties, real estate search, investment properties"
+          url="/dashboard"
+        />
+        <BreadcrumbStructuredData items={[
+          { name: "Home", url: "/" },
+          { name: "Dashboard", url: "/dashboard" }
+        ]} />
         <Navigation user={user} />
         <main className="container mx-auto px-4 py-8 flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -120,6 +132,16 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Property Dashboard - Kensington Real Estate Listings"
+        description="Browse investment properties in Philadelphia's Kensington neighborhood. Filter by price, property type, and view detailed ROI analysis."
+        keywords="property dashboard, Kensington listings, Philadelphia properties, real estate search, investment properties"
+        url="/dashboard"
+      />
+      <BreadcrumbStructuredData items={[
+        { name: "Home", url: "/" },
+        { name: "Dashboard", url: "/dashboard" }
+      ]} />
       <Navigation user={user} />
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
