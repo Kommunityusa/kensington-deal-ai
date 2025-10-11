@@ -228,31 +228,31 @@ const Index = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Beginner-friendly market insights</span>
+                <span className="font-medium">Browse 500+ Kensington property listings</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">ROI calculators & investment guides</span>
+                <span className="font-medium">Automated ROI calculations & investment grades</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Real-time market news & trends</span>
+                <span className="font-medium">Property filtering by price and type</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Property analysis templates</span>
+                <span className="font-medium">Detailed financial breakdowns & profit projections</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Neighborhood revitalization insights</span>
+                <span className="font-medium">Real-time Kensington market news & updates</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Access to 500+ Kensington properties</span>
+                <span className="font-medium">Educational blog posts & investment guides</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Educational resources for new investors</span>
+                <span className="font-medium">Market analysis & risk assessments</span>
               </li>
             </ul>
             <Button variant="hero" size="lg" className="w-full" asChild>
