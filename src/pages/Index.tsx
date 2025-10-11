@@ -206,8 +206,8 @@ const Index = () => {
       {/* Free Access Section */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">100% Free for First-Time Investors</h2>
-          <p className="text-muted-foreground text-lg">Learn to invest in real estate with confidence - no experience or credit card required</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Make Data-Driven Investment Decisions</h2>
+          <p className="text-muted-foreground text-lg">Stop guessing - use real market data and financial analysis to invest with confidence</p>
         </div>
         
         <Card className="max-w-2xl mx-auto hover-scale border-2 border-primary">
