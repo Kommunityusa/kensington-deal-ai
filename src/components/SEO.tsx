@@ -25,7 +25,7 @@ export const SEO = ({
 }: SEOProps) => {
   const siteUrl = window.location.origin;
   const fullUrl = url ? `${siteUrl}${url}` : window.location.href;
-  const fullImage = image.startsWith("http") ? image : `${siteUrl}${image}`;
+  const fullImage = image && image.startsWith("http") ? image : image ? `${siteUrl}${image}` : `${siteUrl}/favicon.png`;
 
   return (
     <Helmet>
