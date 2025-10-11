@@ -168,32 +168,32 @@ export default function PropertyDetails() {
         ]}
       />
       <nav className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Building2 className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">Kensington RE</span>
+            <Building2 className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+            <span className="font-bold text-base md:text-xl">Kensington RE</span>
           </div>
           {user && (
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">{user.email}</span>
+            <div className="flex items-center gap-2 md:gap-4">
+              <span className="text-xs md:text-sm text-muted-foreground hidden sm:inline truncate max-w-[120px] md:max-w-[200px]">{user.email}</span>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                <LogOut className="h-3 w-3 md:h-4 md:w-4 mr-0 md:mr-2" />
+                <span className="hidden md:inline">Sign Out</span>
               </Button>
             </div>
           )}
         </div>
       </nav>
-      <div className="container mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-6">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <Button variant="ghost" onClick={() => navigate("/dashboard")} className="mb-4 md:mb-6" size="sm">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Properties
+          <span className="text-sm">Back to Properties</span>
         </Button>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Property Image */}
           <div className="space-y-4">
-            <div className="relative h-96 bg-muted rounded-lg overflow-hidden">
+            <div className="relative h-64 md:h-96 bg-muted rounded-lg overflow-hidden">
               {property.image_url ? (
                 <img
                   src={property.image_url}
@@ -210,19 +210,19 @@ export default function PropertyDetails() {
           </div>
 
           {/* Property Details */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <div>
-              <div className="flex items-start justify-between mb-2">
-                <h1 className="text-4xl font-bold">{formatCurrency(property.price)}</h1>
-                <Badge variant="secondary">{property.property_type}</Badge>
+              <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between gap-2 mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">{formatCurrency(property.price)}</h1>
+                <Badge variant="secondary" className="text-xs md:text-sm">{property.property_type}</Badge>
               </div>
-              <div className="flex items-center text-muted-foreground mb-4">
-                <MapPin className="h-5 w-5 mr-2" />
-                <span className="text-lg">{property.address}, {property.city}, {property.state} {property.zip_code}</span>
+              <div className="flex items-start text-muted-foreground mb-4">
+                <MapPin className="h-4 w-4 md:h-5 md:w-5 mr-2 mt-1 flex-shrink-0" />
+                <span className="text-sm md:text-lg break-words">{property.address}, {property.city}, {property.state} {property.zip_code}</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
               <Card>
                 <CardContent className="flex items-center gap-3 p-4">
                   <Bed className="h-8 w-8 text-primary" />

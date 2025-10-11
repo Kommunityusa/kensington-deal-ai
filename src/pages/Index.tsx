@@ -229,68 +229,68 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
-          <p className="text-muted-foreground text-lg">Start your investment journey in three simple steps</p>
+      <section className="container mx-auto px-4 py-12 md:py-20">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 px-4">How It Works</h2>
+          <p className="text-muted-foreground text-base md:text-lg px-4">Start your investment journey in three simple steps</p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-5xl mx-auto">
           {/* Step 1 */}
-          <div className="text-center space-y-4 animate-fade-in">
-            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <UserPlus className="h-8 w-8 text-primary" />
+          <div className="text-center space-y-3 md:space-y-4 animate-fade-in px-4">
+            <div className="mx-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+              <UserPlus className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
+            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-xs md:text-sm mb-2">
               Step 1
             </div>
-            <h3 className="text-xl font-bold">Create Free Account</h3>
-            <p className="text-muted-foreground">
+            <h3 className="text-lg md:text-xl font-bold">Create Free Account</h3>
+            <p className="text-sm md:text-base text-muted-foreground">
               Sign up in seconds - no credit card required. Get instant access to all market data and educational resources.
             </p>
           </div>
 
           {/* Step 2 */}
-          <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <FileSearch className="h-8 w-8 text-primary" />
+          <div className="text-center space-y-3 md:space-y-4 animate-fade-in px-4" style={{ animationDelay: '0.1s' }}>
+            <div className="mx-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+              <FileSearch className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
+            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-xs md:text-sm mb-2">
               Step 2
             </div>
-            <h3 className="text-xl font-bold">Explore Properties</h3>
-            <p className="text-muted-foreground">
+            <h3 className="text-lg md:text-xl font-bold">Explore Properties</h3>
+            <p className="text-sm md:text-base text-muted-foreground">
               Browse 50+ Kensington properties with detailed analytics, market trends, and ROI calculations tailored for beginners.
             </p>
           </div>
 
           {/* Step 3 */}
-          <div className="text-center space-y-4 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <CheckCircle className="h-8 w-8 text-primary" />
+          <div className="text-center space-y-3 md:space-y-4 animate-fade-in px-4" style={{ animationDelay: '0.2s' }}>
+            <div className="mx-auto w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 md:mb-4">
+              <CheckCircle className="h-7 w-7 md:h-8 md:w-8 text-primary" />
             </div>
-            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-2">
+            <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary font-semibold text-xs md:text-sm mb-2">
               Step 3
             </div>
-            <h3 className="text-xl font-bold">Make Informed Decisions</h3>
-            <p className="text-muted-foreground">
+            <h3 className="text-lg md:text-xl font-bold">Make Informed Decisions</h3>
+            <p className="text-sm md:text-base text-muted-foreground">
               Use our analysis tools and educational guides to evaluate properties and make confident investment choices.
             </p>
           </div>
         </div>
 
-        <div className="text-center mt-12">
-          <Button size="lg" variant="hero" asChild>
+        <div className="text-center mt-8 md:mt-12 px-4">
+          <Button size="lg" variant="hero" asChild className="w-full sm:w-auto">
             <Link to="/auth">Get Started Now</Link>
           </Button>
         </div>
       </section>
 
       {/* Free Access Section */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Make Data-Driven Investment Decisions</h2>
-          <p className="text-muted-foreground text-lg">Stop guessing - use real market data and financial analysis to invest with confidence</p>
+      <section className="container mx-auto px-4 py-12 md:py-20">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 px-4">Make Data-Driven Investment Decisions</h2>
+          <p className="text-muted-foreground text-base md:text-lg px-4">Stop guessing - use real market data and financial analysis to invest with confidence</p>
         </div>
         
         <Card className="max-w-2xl mx-auto hover-scale border-2 border-primary">
@@ -311,31 +311,31 @@ const Index = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Discover profitable deals with 50+ curated Kensington properties</span>
+                <span className="text-sm md:text-base font-medium">Discover profitable deals with 50+ curated Kensington properties</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Instantly calculate ROI and potential profits on any property</span>
+                <span className="text-sm md:text-base font-medium">Instantly calculate ROI and potential profits on any property</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Find properties that match your budget and investment goals</span>
+                <span className="text-sm md:text-base font-medium">Find properties that match your budget and investment goals</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Understand the real costs and profit potential before you invest</span>
+                <span className="text-sm md:text-base font-medium">Understand the real costs and profit potential before you invest</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Stay ahead with daily Kensington market trends and news</span>
+                <span className="text-sm md:text-base font-medium">Stay ahead with daily Kensington market trends and news</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Learn from expert guides written for first-time investors</span>
+                <span className="text-sm md:text-base font-medium">Learn from expert guides written for first-time investors</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Make smarter decisions with professional risk assessments</span>
+                <span className="text-sm md:text-base font-medium">Make smarter decisions with professional risk assessments</span>
               </li>
             </ul>
             <Button variant="hero" size="lg" className="w-full" asChild>
@@ -346,13 +346,13 @@ const Index = () => {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20 bg-muted/20">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Kensington?</h2>
-          <p className="text-muted-foreground text-lg">Perfect for first-time real estate investors</p>
+      <section className="container mx-auto px-4 py-12 md:py-20 bg-muted/20">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-4 px-4">Why Choose Kensington?</h2>
+          <p className="text-muted-foreground text-base md:text-lg px-4">Perfect for first-time real estate investors</p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
             <Card className="hover-scale">
               <CardHeader>
                 <GraduationCap className="h-10 w-10 text-primary mb-2" />

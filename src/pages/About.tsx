@@ -21,31 +21,31 @@ const About = () => {
       ]} />
       {/* Navigation */}
       <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 py-3 md:py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/favicon.png" alt="Logo" className="h-8 w-8" />
-            <span className="font-bold text-xl">Kensington Deals</span>
+            <img src="/favicon.png" alt="Logo" className="h-6 w-6 md:h-8 md:w-8" />
+            <span className="font-bold text-base md:text-xl">Kensington Deals</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <Link to="/auth">
-              <Button variant="ghost">Sign In</Button>
+              <Button variant="ghost" size="sm" className="text-xs md:text-sm">Sign In</Button>
             </Link>
             <Link to="/auth">
-              <Button>Get Started</Button>
+              <Button size="sm" className="text-xs md:text-sm">Get Started</Button>
             </Link>
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
           {/* Header */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
+          <div className="text-center space-y-3 md:space-y-4 px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-primary-glow to-accent bg-clip-text text-transparent">
               About Kensington Deals
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Your trusted guide to first-time real estate investing in Philadelphia
             </p>
           </div>

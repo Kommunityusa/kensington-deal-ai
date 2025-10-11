@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     };
 
     const emailResponse = await resend.emails.send({
-      from: "Kensington Deals <onboarding@resend.dev>",
+      from: "Kensington Deals <hello@kensingtondeals.com>",
       to: [userEmail],
       subject: `New Property Match: ${property.address}`,
       html: `

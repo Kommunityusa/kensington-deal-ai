@@ -97,7 +97,7 @@ export default function ListProperty() {
         ]}
       />
       <Navigation user={null} />
-      <main className="container mx-auto px-4 py-8 max-w-3xl">
+      <main className="container mx-auto px-4 py-6 md:py-8 max-w-3xl">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
