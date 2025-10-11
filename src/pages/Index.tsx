@@ -70,6 +70,9 @@ const Index = () => {
             <Link to="/about" className="text-xs md:text-sm hover:text-primary transition-colors">
               About
             </Link>
+            <Link to="/blog" className="text-xs md:text-sm hover:text-primary transition-colors">
+              Blog
+            </Link>
             <div className="flex gap-2 md:gap-3">
               <Button variant="ghost" size="sm" asChild className="hidden sm:flex">
                 <Link to="/auth">Sign In</Link>
