@@ -352,6 +352,42 @@ export type Database = {
           },
         ]
       }
+      property_notification_preferences: {
+        Row: {
+          created_at: string | null
+          email_notifications_enabled: boolean | null
+          id: string
+          max_price: number | null
+          min_bedrooms: number | null
+          min_price: number | null
+          property_types: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_notifications_enabled?: boolean | null
+          id?: string
+          max_price?: number | null
+          min_bedrooms?: number | null
+          min_price?: number | null
+          property_types?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_notifications_enabled?: boolean | null
+          id?: string
+          max_price?: number | null
+          min_bedrooms?: number | null
+          min_price?: number | null
+          property_types?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_searches: {
         Row: {
           created_at: string | null
