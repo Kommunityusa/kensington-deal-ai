@@ -7,6 +7,7 @@ import { Home, Search, MapPin, TrendingUp, Shield, Zap, Loader2, Check, Crown, G
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingNewsCard from "@/components/LandingNewsCard";
+import LandingPropertyCard from "@/components/LandingPropertyCard";
 
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
@@ -14,10 +15,13 @@ import { OrganizationStructuredData, LocalBusinessStructuredData, BreadcrumbStru
 
 const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [propertiesLoading, setPropertiesLoading] = useState(true);
 
   useEffect(() => {
     fetchNewsArticles();
+    fetchProperties();
   }, []);
 
   const fetchNewsArticles = async () => {
@@ -45,6 +49,28 @@ const Index = () => {
       console.error("Error fetching news articles:", error);
     }
     setLoading(false);
+  };
+
+  const fetchProperties = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (error) {
+        console.error('Error fetching properties:', error);
+      }
+
+      if (data) {
+        setProperties(data);
+      }
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+    }
+    setPropertiesLoading(false);
   };
 
 
@@ -141,6 +167,39 @@ const Index = () => {
         <div className="text-center px-4">
           <Button size="lg" variant="hero" asChild className="w-full sm:w-auto">
             <Link to="/news">View All News</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Featured Properties Section */}
+      <section className="container mx-auto px-4 py-12 md:py-20 bg-muted/20">
+        <div className="text-center mb-8 md:mb-12">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Home className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold">Featured Investment Properties</h2>
+          </div>
+          <p className="text-muted-foreground text-sm md:text-lg px-4">
+            Explore curated properties in Kensington - sign in to see full details
+          </p>
+        </div>
+        
+        {propertiesLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : properties.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto mb-8 md:mb-12">
+            {properties.map((property) => (
+              <LandingPropertyCard key={property.id} property={property} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground">No properties available at the moment.</p>
+        )}
+
+        <div className="text-center px-4">
+          <Button size="lg" variant="hero" asChild className="w-full sm:w-auto">
+            <Link to="/auth">View All Properties</Link>
           </Button>
         </div>
       </section>
