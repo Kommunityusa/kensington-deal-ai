@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import LandingNewsCard from "@/components/LandingNewsCard";
 import { TrendAnalysis } from "@/components/TrendAnalysis";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
@@ -279,12 +280,7 @@ const Index = () => {
         </Card>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p>© 2025 Kensington Deals. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
