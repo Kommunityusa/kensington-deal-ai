@@ -28,7 +28,25 @@ const Index = () => {
   useEffect(() => {
     fetchNewsArticles();
     fetchProperties();
+    fetchPropertyImages();
   }, []);
+
+  const fetchPropertyImages = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-property-images');
+      if (error) {
+        console.error('Error fetching property images:', error);
+      } else {
+        console.log('Property images fetch result:', data);
+        // Refetch properties after images are updated
+        if (data?.updated > 0) {
+          setTimeout(() => fetchProperties(), 2000);
+        }
+      }
+    } catch (error) {
+      console.error('Error invoking fetch-property-images:', error);
+    }
+  };
 
   const fetchNewsArticles = async () => {
     console.log('Starting to fetch news articles...');
