@@ -13,11 +13,6 @@ import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { OrganizationStructuredData, LocalBusinessStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 
-import propertyPlaceholder1 from "@/assets/property-placeholder-1.jpg";
-import propertyPlaceholder2 from "@/assets/property-placeholder-2.jpg";
-import propertyPlaceholder3 from "@/assets/property-placeholder-3.jpg";
-import propertyPlaceholder4 from "@/assets/property-placeholder-4.jpg";
-
 
 const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
@@ -77,13 +72,6 @@ const Index = () => {
 
   const fetchProperties = async () => {
     console.log('Starting to fetch properties...');
-    
-    const placeholderImages = [
-      propertyPlaceholder1,
-      propertyPlaceholder2,
-      propertyPlaceholder3,
-      propertyPlaceholder4,
-    ];
 
     try {
       const { data, error } = await supabase
@@ -101,12 +89,7 @@ const Index = () => {
 
       if (data) {
         console.log(`Received ${data.length} properties`);
-        // Add placeholder images to properties that don't have images
-        const propertiesWithImages = data.map((property, index) => ({
-          ...property,
-          image_url: property.image_url || placeholderImages[index % placeholderImages.length]
-        }));
-        setProperties(propertiesWithImages);
+        setProperties(data);
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
