@@ -59,6 +59,7 @@ const Index = () => {
   };
 
   const fetchProperties = async () => {
+    console.log('Starting to fetch properties...');
     const placeholderImages = [
       propertyPlaceholder1,
       propertyPlaceholder2,
@@ -76,16 +77,20 @@ const Index = () => {
         .order('created_at', { ascending: false })
         .limit(6);
 
+      console.log('Fetch properties response:', { data, error, count: data?.length });
+
       if (error) {
         console.error('Error fetching properties:', error);
       }
 
       if (data) {
+        console.log(`Received ${data.length} properties`);
         // Add placeholder images to properties
         const propertiesWithImages = data.map((property, index) => ({
           ...property,
           image_url: property.image_url || placeholderImages[index % placeholderImages.length]
         }));
+        console.log('Properties with images:', propertiesWithImages);
         setProperties(propertiesWithImages);
       }
     } catch (error) {
