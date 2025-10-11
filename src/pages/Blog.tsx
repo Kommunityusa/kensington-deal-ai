@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, ArrowRight, BookOpen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import kensingtonLogo from "@/assets/kensington-logo-placeholder.png";
 
 export default function Blog() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -131,8 +132,12 @@ export default function Blog() {
                         )}
                       </div>
                     ) : (
-                      <div className="h-56 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center">
-                        <BookOpen className="h-16 w-16 text-primary/20" />
+                      <div className="h-56 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center p-8">
+                        <img 
+                          src={kensingtonLogo} 
+                          alt="Kensington Deals" 
+                          className="w-full h-full object-contain opacity-40"
+                        />
                       </div>
                     )}
 
