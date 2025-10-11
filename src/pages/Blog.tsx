@@ -82,16 +82,14 @@ export default function Blog() {
           <div className="container mx-auto px-4">
             {loading ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i}>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card key={i} className="overflow-hidden">
+                    <Skeleton className="h-56 w-full" />
                     <CardHeader>
-                      <Skeleton className="h-48 w-full mb-4" />
-                      <Skeleton className="h-6 w-3/4" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="h-4 w-full mb-2" />
+                      <Skeleton className="h-6 w-3/4 mb-2" />
+                      <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-4 w-2/3" />
-                    </CardContent>
+                    </CardHeader>
                   </Card>
                 ))}
               </div>
@@ -99,56 +97,88 @@ export default function Blog() {
               <div className="text-center py-16">
                 <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                 <h2 className="text-2xl font-bold mb-4">No blog posts yet</h2>
-                <p className="text-muted-foreground">Check back soon for expert real estate investment content!</p>
+                <p className="text-muted-foreground mb-6">Check back soon for expert real estate investment content!</p>
+                {user && (
+                  <Button asChild>
+                    <a href="/blog-admin">Create First Post</a>
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {posts.map((post) => (
                   <Card 
                     key={post.id}
-                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                    className="group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-0 bg-card"
                     onClick={() => navigate(`/blog/${post.slug}`)}
                   >
-                    {post.featured_image_url && (
-                      <div className="relative h-48 bg-muted overflow-hidden rounded-t-lg">
+                    {/* Featured Image */}
+                    {post.featured_image_url ? (
+                      <div className="relative h-56 bg-muted overflow-hidden">
                         <img
                           src={post.featured_image_url}
                           alt={post.title}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                         />
+                        {post.category && (
+                          <Badge 
+                            variant="secondary" 
+                            className="absolute top-4 left-4 bg-background/90 backdrop-blur-sm"
+                          >
+                            {post.category}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="h-56 bg-gradient-to-br from-primary/10 via-primary/5 to-background flex items-center justify-center">
+                        <BookOpen className="h-16 w-16 text-primary/20" />
                       </div>
                     )}
-                    <CardHeader>
-                      {post.category && (
-                        <Badge variant="secondary" className="w-fit mb-2">
+
+                    <CardHeader className="space-y-3">
+                      {!post.featured_image_url && post.category && (
+                        <Badge variant="secondary" className="w-fit">
                           {post.category}
                         </Badge>
                       )}
-                      <CardTitle className="line-clamp-2 hover:text-primary transition-colors">
+                      
+                      <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors text-xl leading-tight">
                         {post.title}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+
+                    <CardContent className="space-y-4">
+                      {/* Excerpt */}
                       {post.excerpt && (
-                        <p className="text-muted-foreground line-clamp-3 mb-4">
+                        <p className="text-muted-foreground line-clamp-3 leading-relaxed">
                           {post.excerpt}
                         </p>
                       )}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+
+                      {/* Meta Info */}
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground pt-4 border-t">
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
-                          {formatDate(post.published_at)}
+                          <Calendar className="h-3 w-3" />
+                          <time dateTime={post.published_at}>
+                            {formatDate(post.published_at)}
+                          </time>
                         </div>
                         {post.read_time_minutes && (
                           <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {post.read_time_minutes} min read
+                            <Clock className="h-3 w-3" />
+                            {post.read_time_minutes} min
                           </div>
                         )}
                       </div>
-                      <Button variant="link" className="p-0 h-auto">
-                        Read More <ArrowRight className="h-4 w-4 ml-1" />
+
+                      {/* Read More Link */}
+                      <Button 
+                        variant="link" 
+                        className="p-0 h-auto text-primary font-medium group-hover:gap-2 transition-all"
+                      >
+                        Read Article 
+                        <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
                       </Button>
                     </CardContent>
                   </Card>

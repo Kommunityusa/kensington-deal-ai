@@ -110,69 +110,117 @@ export default function BlogPost() {
       <Navigation user={user} />
       
       <main className="flex-1">
+        {/* Hero Section with Featured Image */}
+        {post.featured_image_url && (
+          <div className="relative h-[400px] bg-muted overflow-hidden">
+            <img
+              src={post.featured_image_url}
+              alt={post.title}
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+          </div>
+        )}
+
         <article className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Back Button */}
           <Button 
             variant="ghost" 
             onClick={() => navigate("/blog")}
-            className="mb-6"
+            className="mb-8 -ml-3"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Blog
           </Button>
 
-          {post.featured_image_url && (
-            <div className="relative h-96 bg-muted rounded-lg overflow-hidden mb-8">
-              <img
-                src={post.featured_image_url}
-                alt={post.title}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-            </div>
-          )}
+          {/* Article Header */}
+          <header className={`mb-12 ${post.featured_image_url ? '-mt-32 relative z-10' : ''}`}>
+            <div className="space-y-6">
+              {/* Category Badge */}
+              {post.category && (
+                <Badge variant="secondary" className="text-sm px-4 py-1.5">
+                  {post.category}
+                </Badge>
+              )}
+              
+              {/* Title */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+                {post.title}
+              </h1>
+              
+              {/* Excerpt */}
+              {post.excerpt && (
+                <p className="text-xl text-muted-foreground leading-relaxed">
+                  {post.excerpt}
+                </p>
+              )}
 
-          <header className="mb-8">
-            {post.category && (
-              <Badge variant="secondary" className="mb-4">
-                {post.category}
-              </Badge>
-            )}
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
-            
-            <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{post.author}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <span>{formatDate(post.published_at)}</span>
-              </div>
-              {post.read_time_minutes && (
+              {/* Meta Information */}
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{post.read_time_minutes} min read</span>
+                  <User className="h-4 w-4" />
+                  <span className="font-medium">{post.author}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
+                </div>
+                {post.read_time_minutes && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    <span>{post.read_time_minutes} min read</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-4">
+                  {post.tags.map((tag: string) => (
+                    <Badge key={tag} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
                 </div>
               )}
             </div>
-
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {post.tags.map((tag: string) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
           </header>
 
-          <Separator className="mb-8" />
+          <Separator className="mb-12" />
 
+          {/* Article Content */}
           <div 
-            className="prose prose-lg dark:prose-invert max-w-none"
+            className="prose prose-lg dark:prose-invert max-w-none
+              prose-headings:font-bold prose-headings:tracking-tight
+              prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
+              prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
+              prose-p:text-lg prose-p:leading-relaxed prose-p:mb-6
+              prose-ul:my-6 prose-li:my-2
+              prose-strong:text-foreground prose-strong:font-semibold
+              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+              prose-img:rounded-lg prose-img:shadow-lg"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
+
+          {/* Article Footer */}
+          <div className="mt-16 pt-8 border-t space-y-8">
+            {/* Call to Action */}
+            <div className="bg-primary/5 rounded-lg p-8 text-center">
+              <h3 className="text-2xl font-bold mb-3">Ready to Start Investing?</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Explore investment opportunities in Philadelphia's Kensington neighborhood
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button size="lg" asChild>
+                  <a href="/dashboard">Browse Properties</a>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <a href="/about">Learn More</a>
+                </Button>
+              </div>
+            </div>
+          </div>
         </article>
       </main>
       
