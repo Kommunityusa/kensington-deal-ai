@@ -177,7 +177,7 @@ const Index = () => {
             </div>
             <h3 className="text-xl font-bold">Explore Properties</h3>
             <p className="text-muted-foreground">
-              Browse 500+ Kensington properties with detailed analytics, market trends, and ROI calculations tailored for beginners.
+              Browse 50+ Kensington properties with detailed analytics, market trends, and ROI calculations tailored for beginners.
             </p>
           </div>
 
@@ -228,7 +228,7 @@ const Index = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <span className="font-medium">Browse 500+ Kensington property listings</span>
+                <span className="font-medium">Browse 50+ Kensington property listings</span>
               </li>
               <li className="flex items-start gap-2">
                 <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
