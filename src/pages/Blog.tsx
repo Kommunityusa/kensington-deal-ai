@@ -4,6 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { OrganizationStructuredData } from "@/components/StructuredData";
+import { Helmet } from "react-helmet-async";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,9 @@ export default function Blog() {
         keywords="real estate blog, Philadelphia investment, Kensington market trends, real estate investing tips, property investment strategies"
         url="/blog"
       />
+      <Helmet>
+        <link rel="alternate" type="application/rss+xml" title="Kensington Deals Blog RSS Feed" href={`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-rss`} />
+      </Helmet>
       <OrganizationStructuredData />
       
       <Navigation user={user} />

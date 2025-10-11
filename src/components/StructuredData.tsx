@@ -202,3 +202,57 @@ export const BreadcrumbStructuredData = ({ items }: { items: { name: string; url
     </Helmet>
   );
 };
+
+export const FAQStructuredData = ({ faqs }: { faqs: { question: string; answer: string }[] }) => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+
+  return (
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
+    </Helmet>
+  );
+};
+
+export const HowToStructuredData = ({ 
+  name, 
+  description, 
+  steps 
+}: { 
+  name: string; 
+  description: string; 
+  steps: { name: string; text: string }[] 
+}) => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": name,
+    "description": description,
+    "step": steps.map((step, index) => ({
+      "@type": "HowToStep",
+      "position": index + 1,
+      "name": step.name,
+      "text": step.text
+    }))
+  };
+
+  return (
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
+    </Helmet>
+  );
+};

@@ -50,8 +50,8 @@ serve(async (req) => {
 
     console.log(`Generating blog post: ${topic}`);
 
-    // Generate content using Lovable AI
-    const prompt = `Write a comprehensive, SEO-optimized blog post about: "${topic}"
+    // Generate content using Lovable AI with AI-search optimization
+    const prompt = `Write a comprehensive, AI-search optimized blog post about: "${topic}"
 
 Category: ${category}
 Context: This is for a Philadelphia real estate investment platform focused on the Kensington neighborhood.
@@ -66,16 +66,34 @@ Requirements:
 7. Focus on local Philadelphia/Kensington market insights
 8. Include specific examples and numbers where appropriate
 9. Add a compelling conclusion with a call-to-action
+10. CRITICAL: Create 5-8 frequently asked questions with detailed answers (optimize for featured snippets)
+11. CRITICAL: If applicable, include step-by-step instructions for HowTo schema
+12. Structure content to answer common queries directly
+13. Use clear, concise paragraphs that can serve as direct answers
 
 Also provide:
 - A compelling 2-sentence excerpt (under 160 characters) that summarizes the article
 - 3-5 relevant tags as a comma-separated list
+- FAQs with questions and answers
+- Steps if applicable (for how-to content)
 
 Return the response in this exact JSON format:
 {
   "excerpt": "Your 2-sentence excerpt here",
   "content": "Full HTML content here",
-  "tags": "tag1, tag2, tag3"
+  "tags": "tag1, tag2, tag3",
+  "faqs": [
+    {
+      "question": "Clear, specific question?",
+      "answer": "Direct, comprehensive answer in 2-3 sentences"
+    }
+  ],
+  "steps": [
+    {
+      "name": "Step name",
+      "text": "Step description"
+    }
+  ]
 }`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -137,7 +155,7 @@ Return the response in this exact JSON format:
     // Parse tags
     const tags = blogData.tags.split(',').map((tag: string) => tag.trim());
 
-    // Insert blog post
+    // Insert blog post with FAQs and steps
     const { error } = await supabase.from('blog_posts').insert({
       title: topic,
       slug: slug,
@@ -145,6 +163,8 @@ Return the response in this exact JSON format:
       content: blogData.content,
       category: category,
       tags: tags,
+      faqs: blogData.faqs || null,
+      steps: blogData.steps || null,
       is_published: true,
       read_time_minutes: readTime,
       meta_title: `${topic} | Kensington Deals`,

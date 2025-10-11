@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
-import { ArticleStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
+import { ArticleStructuredData, BreadcrumbStructuredData, FAQStructuredData, HowToStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, Clock, User, FileText } from "lucide-react";
@@ -105,6 +105,16 @@ export default function BlogPost() {
           { name: post.title, url: `/blog/${post.slug}` }
         ]}
       />
+      {post.faqs && post.faqs.length > 0 && (
+        <FAQStructuredData faqs={post.faqs} />
+      )}
+      {post.steps && post.steps.length > 0 && (
+        <HowToStructuredData 
+          name={post.title}
+          description={post.excerpt || post.title}
+          steps={post.steps}
+        />
+      )}
       
       <Navigation user={user} />
       
