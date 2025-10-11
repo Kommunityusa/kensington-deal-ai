@@ -135,17 +135,17 @@ export default function BlogPost() {
           </Button>
 
           {/* Article Header */}
-          <header className={`mb-12 ${post.featured_image_url ? '-mt-32 relative z-10' : ''}`}>
-            <div className="space-y-6">
+          <header className={`mb-16 ${post.featured_image_url ? '-mt-32 relative z-10' : ''}`}>
+            <div className="space-y-8">
               {/* Category Badge */}
               {post.category && (
-                <Badge variant="secondary" className="text-sm px-4 py-1.5">
+                <Badge variant="secondary" className="text-base px-6 py-2">
                   {post.category}
                 </Badge>
               )}
               
               {/* Title */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
                 {post.title}
               </h1>
               
@@ -187,19 +187,22 @@ export default function BlogPost() {
             </div>
           </header>
 
-          <Separator className="mb-12" />
+          <Separator className="mb-16" />
 
           {/* Article Content */}
           <div 
-            className="prose prose-lg dark:prose-invert max-w-none
+            className="prose prose-xl dark:prose-invert max-w-none
               prose-headings:font-bold prose-headings:tracking-tight
-              prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-8
-              prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-6
-              prose-p:text-lg prose-p:leading-relaxed prose-p:mb-8
-              prose-ul:my-8 prose-ul:space-y-3 prose-li:my-2
-              prose-strong:text-foreground prose-strong:font-semibold
-              prose-a:text-primary prose-a:no-underline hover:prose-a:underline
-              prose-img:rounded-lg prose-img:shadow-lg prose-img:my-10"
+              prose-h2:text-4xl prose-h2:mt-20 prose-h2:mb-10 prose-h2:scroll-mt-20
+              prose-h3:text-3xl prose-h3:mt-16 prose-h3:mb-8 prose-h3:scroll-mt-20
+              prose-p:text-xl prose-p:leading-[1.8] prose-p:mb-10 prose-p:text-foreground/90
+              prose-ul:my-10 prose-ul:space-y-4 prose-li:my-3 prose-li:text-xl prose-li:leading-relaxed
+              prose-ol:my-10 prose-ol:space-y-4
+              prose-strong:text-foreground prose-strong:font-bold
+              prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
+              prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:my-10
+              prose-img:rounded-lg prose-img:shadow-lg prose-img:my-12
+              prose-hr:my-12 prose-hr:border-border"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
