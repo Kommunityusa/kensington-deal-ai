@@ -36,8 +36,9 @@ const Index = () => {
 
       if (!error && data?.properties) {
         console.log(`Received ${data.properties.length} properties`);
-        // Show only first 6 properties on landing page
-        setProperties(data.properties.slice(0, 6));
+        // Filter properties with images and show only first 6 on landing page
+        const propertiesWithImages = data.properties.filter((p: any) => p.image_url);
+        setProperties(propertiesWithImages.slice(0, 6));
       } else {
         console.log('No properties in response');
       }
