@@ -13,12 +13,6 @@ import Footer from "@/components/Footer";
 import { SEO } from "@/components/SEO";
 import { OrganizationStructuredData, LocalBusinessStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 
-import propertyPlaceholder1 from "@/assets/property-placeholder-1.jpg";
-import propertyPlaceholder2 from "@/assets/property-placeholder-2.jpg";
-import propertyPlaceholder3 from "@/assets/property-placeholder-3.jpg";
-import propertyPlaceholder4 from "@/assets/property-placeholder-4.jpg";
-import propertyPlaceholder5 from "@/assets/property-placeholder-5.jpg";
-import propertyPlaceholder6 from "@/assets/property-placeholder-6.jpg";
 
 const Index = () => {
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
@@ -60,22 +54,14 @@ const Index = () => {
 
   const fetchProperties = async () => {
     console.log('Starting to fetch properties...');
-    const placeholderImages = [
-      propertyPlaceholder1,
-      propertyPlaceholder2,
-      propertyPlaceholder3,
-      propertyPlaceholder4,
-      propertyPlaceholder5,
-      propertyPlaceholder6,
-    ];
-
+    
     try {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false })
-        .limit(6);
+        .limit(4);
 
       console.log('Fetch properties response:', { data, error, count: data?.length });
 
@@ -85,13 +71,7 @@ const Index = () => {
 
       if (data) {
         console.log(`Received ${data.length} properties`);
-        // Add placeholder images to properties
-        const propertiesWithImages = data.map((property, index) => ({
-          ...property,
-          image_url: property.image_url || placeholderImages[index % placeholderImages.length]
-        }));
-        console.log('Properties with images:', propertiesWithImages);
-        setProperties(propertiesWithImages);
+        setProperties(data);
       }
     } catch (error) {
       console.error("Error fetching properties:", error);
@@ -214,7 +194,7 @@ const Index = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : properties.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto mb-8 md:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto mb-8 md:mb-12">
             {properties.map((property) => (
               <LandingPropertyCard key={property.id} property={property} />
             ))}
