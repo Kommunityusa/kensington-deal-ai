@@ -7,8 +7,7 @@ import { SEO } from "@/components/SEO";
 import { ArticleStructuredData, BreadcrumbStructuredData } from "@/components/StructuredData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calendar, Clock, User, BookOpen } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, FileText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BlogPost() {
@@ -55,7 +54,7 @@ export default function BlogPost() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navigation user={user} />
-        <main className="flex-1 container mx-auto px-4 py-8">
+        <main className="flex-1 container mx-auto px-4 py-8 max-w-3xl">
           <Skeleton className="h-96 w-full mb-8" />
           <Skeleton className="h-64 w-full" />
         </main>
@@ -68,7 +67,7 @@ export default function BlogPost() {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <Navigation user={user} />
-        <main className="flex-1 container mx-auto px-4 py-16 text-center">
+        <main className="flex-1 container mx-auto px-4 py-16 text-center max-w-3xl">
           <h1 className="text-3xl font-bold mb-4">Blog Post Not Found</h1>
           <Button onClick={() => navigate("/blog")}>Back to Blog</Button>
         </main>
@@ -109,81 +108,68 @@ export default function BlogPost() {
       
       <Navigation user={user} />
       
-      <main className="flex-1 bg-background">
-        <article className="container mx-auto px-4 py-12 max-w-4xl">
+      <main className="flex-1">
+        <article className="container mx-auto px-4 py-16 max-w-3xl">
           {/* Back Button */}
           <Button 
             variant="ghost" 
             onClick={() => navigate("/blog")}
-            className="mb-12 -ml-3 text-muted-foreground hover:text-foreground"
+            className="mb-12 -ml-3"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Blog
           </Button>
 
-          {/* Article Header - Clean & Simple */}
-          <header className="mb-16 space-y-8">
-            {/* Category Badge */}
-            {post.category && (
+          {/* Category */}
+          {post.category && (
+            <div className="flex items-center gap-2 mb-8">
+              <FileText className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-primary">
+                {post.category}
+              </span>
+            </div>
+          )}
+
+          {/* Title */}
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">
+            {post.title}
+          </h1>
+
+          {/* Meta */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-12 pb-8 border-b">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>{post.author}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
+            </div>
+            {post.read_time_minutes && (
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded bg-primary/10 flex items-center justify-center">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                </div>
-                <span className="text-primary font-medium text-sm">
-                  {post.category}
-                </span>
+                <Clock className="h-4 w-4" />
+                <span>{post.read_time_minutes} min read</span>
               </div>
             )}
-            
-            {/* Title */}
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] text-foreground">
-              {post.title}
-            </h1>
+          </div>
 
-            {/* Meta Information - Single Row */}
-            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span>{post.author}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <time dateTime={post.published_at}>{formatDate(post.published_at)}</time>
-              </div>
-              {post.read_time_minutes && (
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <span>{post.read_time_minutes} min read</span>
-                </div>
-              )}
-            </div>
-          </header>
-
-          {/* Article Content with Better Spacing */}
+          {/* Content */}
           <div 
-            className="prose prose-lg dark:prose-invert max-w-none
-              prose-headings:font-bold prose-headings:text-foreground prose-headings:tracking-tight
-              prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:font-bold
-              prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-4 prose-h3:font-semibold
-              prose-p:text-lg prose-p:leading-[1.8] prose-p:mb-8 prose-p:text-muted-foreground
-              prose-ul:my-8 prose-ul:space-y-3 prose-li:text-muted-foreground prose-li:leading-relaxed
-              prose-ol:my-8 prose-ol:space-y-3
-              prose-strong:text-foreground prose-strong:font-semibold
-              prose-a:text-primary prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-a:transition-all
-              prose-blockquote:border-l-4 prose-blockquote:border-primary/30 prose-blockquote:bg-muted/30 prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:rounded-r prose-blockquote:not-italic prose-blockquote:my-8
-              prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:text-sm
-              prose-pre:bg-muted prose-pre:border prose-pre:border-border prose-pre:rounded-lg prose-pre:my-8
-              prose-img:rounded-lg prose-img:shadow-md prose-img:my-12 prose-img:mx-auto
-              prose-hr:my-12 prose-hr:border-border"
+            className="article-content"
+            style={{
+              fontSize: '18px',
+              lineHeight: '1.8',
+              color: 'hsl(var(--muted-foreground))'
+            }}
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
-          {/* Tags Section */}
+          {/* Tags */}
           {post.tags && post.tags.length > 0 && (
             <div className="mt-16 pt-8 border-t">
               <div className="flex flex-wrap gap-2">
                 {post.tags.map((tag: string) => (
-                  <Badge key={tag} variant="secondary" className="text-sm px-4 py-1.5 font-normal">
+                  <Badge key={tag} variant="secondary">
                     {tag}
                   </Badge>
                 ))}
@@ -191,21 +177,19 @@ export default function BlogPost() {
             </div>
           )}
 
-          {/* Article Footer - CTA */}
-          <div className="mt-16 pt-8 border-t">
-            <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-2xl p-10 text-center border border-primary/10">
-              <h3 className="text-3xl font-bold mb-4 text-foreground">Ready to Start Investing in Kensington?</h3>
-              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Explore curated investment opportunities with detailed analysis and market insights
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Button size="lg" className="px-8" asChild>
-                  <a href="/dashboard">Browse Properties</a>
-                </Button>
-                <Button size="lg" variant="outline" className="px-8" asChild>
-                  <a href="/about">Learn More About Us</a>
-                </Button>
-              </div>
+          {/* CTA */}
+          <div className="mt-16 p-8 bg-muted/50 rounded-lg text-center">
+            <h3 className="text-2xl font-bold mb-3">Ready to Start Investing?</h3>
+            <p className="text-muted-foreground mb-6">
+              Explore investment opportunities in Philadelphia's Kensington neighborhood
+            </p>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <Button size="lg" asChild>
+                <a href="/dashboard">Browse Properties</a>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <a href="/about">Learn More</a>
+              </Button>
             </div>
           </div>
         </article>
