@@ -30,13 +30,9 @@ export default function LandingNewsCard({ article }: LandingNewsCardProps) {
       <CardHeader className="p-0">
         <div className="relative h-48 bg-muted rounded-t-lg overflow-hidden">
           <img
-            src={article.image_url || placeholderLogo}
+            src={placeholderLogo}
             alt={article.title}
-            className={`w-full h-full ${article.image_url ? 'object-cover' : 'object-contain p-8'} group-hover:scale-105 transition-transform duration-300`}
-            onError={(e) => {
-              e.currentTarget.src = placeholderLogo;
-              e.currentTarget.className = 'w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-300';
-            }}
+            className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute top-3 right-3">
             <Badge variant="default" className="bg-background/95 text-foreground border border-border shadow-lg backdrop-blur-sm font-medium">
