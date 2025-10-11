@@ -5,38 +5,28 @@ import { User } from "@supabase/supabase-js";
 import Navigation from "@/components/Navigation";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyFilters from "@/components/PropertyFilters";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, loading: authLoading } = useAuth(true);
   const [properties, setProperties] = useState<any[]>([]);
   const [totalProperties, setTotalProperties] = useState(0);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(12);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     minPrice: "",
     maxPrice: "",
     propertyType: "all",
     sortBy: "newest"
   });
-
-
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
 
 
   useEffect(() => {
@@ -54,6 +44,7 @@ export default function Dashboard() {
 
   const fetchProperties = async () => {
     setLoading(true);
+    setError(null);
     console.log('Starting to fetch properties with filters:', filters, 'page:', currentPage);
     try {
       const { data, error } = await supabase.functions.invoke('fetch-properties', {
@@ -72,6 +63,7 @@ export default function Dashboard() {
 
       if (error) {
         console.error("Error fetching properties:", error);
+        setError(`Failed to load properties: ${error.message}`);
         toast.error(`Failed to fetch properties: ${error.message}`);
         setProperties([]);
       } else {
@@ -95,6 +87,8 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error calling fetch-properties function:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      setError(`Failed to load properties: ${errorMessage}`);
       toast.error("Failed to fetch properties. Please try again.");
       setProperties([]);
     }
@@ -112,6 +106,17 @@ export default function Dashboard() {
 
   // Show loading state
   const isLoading = loading;
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation user={user} />
+        <main className="container mx-auto px-4 py-8 flex items-center justify-center h-96">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -163,6 +168,14 @@ export default function Dashboard() {
         </Card>
 
         <PropertyFilters filters={filters} setFilters={setFilters} />
+
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         {isLoading ? (
           <div className="flex justify-center items-center py-20">
