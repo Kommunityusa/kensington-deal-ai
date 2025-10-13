@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Bed, Bath, Home, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import logoPlaceholder from "@/assets/kensington-logo-placeholder.png";
 
 interface PropertyCardProps {
   property: any;
@@ -31,25 +32,15 @@ export default function PropertyCard({ property, isPremium = false }: PropertyCa
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader className="p-0">
         <div className="relative h-48 bg-muted rounded-t-lg overflow-hidden">
-          {property.image_url ? (
-            <img
-              src={property.image_url}
-              alt={`Investment property at ${property.address} - ${property.bedrooms} bed, ${property.bathrooms} bath, ${property.square_feet} sqft`}
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                const parent = e.currentTarget.parentElement;
-                if (parent) {
-                  parent.innerHTML = '<div class="flex items-center justify-center h-full bg-muted"><svg class="h-16 w-16 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>';
-                }
-              }}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full bg-muted">
-              <Home className="h-16 w-16 text-muted-foreground" />
-            </div>
-          )}
+          <img
+            src={property.image_url || logoPlaceholder}
+            alt={`Investment property at ${property.address} - ${property.bedrooms} bed, ${property.bathrooms} bath, ${property.square_feet} sqft`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.src = logoPlaceholder;
+            }}
+          />
           <div className="absolute top-2 right-2">
             <Badge variant="secondary" className="bg-background/90">
               {property.property_type}
