@@ -10,8 +10,8 @@ const About = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-primary/5">
       <SEO 
         title="About Kensington Deals - Philadelphia Real Estate Investment Platform"
-        description="Learn about Kensington Deals, a Philadelphia real estate investment platform built by Connex II Inc. Our mission is to empower first-time investors in the Kensington neighborhood."
-        keywords="about Kensington Deals, Connex II Inc, Philadelphia venture studio, real estate platform, Kensington investment, kommunity.app, cashflowai.biz, referredai.org"
+        description="Learn about Kensington Deals, a Philadelphia real estate investment platform. Our mission is to empower first-time investors in the Kensington neighborhood."
+        keywords="about Kensington Deals, Philadelphia real estate platform, Kensington investment, first-time investors"
         url="/about"
       />
       <OrganizationStructuredData />
@@ -128,54 +128,6 @@ const About = () => {
             </CardContent>
           </Card>
 
-          {/* Built By Connex II Inc */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Built by Connex II Inc</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-sm max-w-none dark:prose-invert space-y-4">
-              <p className="text-muted-foreground">
-                Kensington Deals is proudly developed by <strong>Connex II Inc</strong>, a Philadelphia-based 
-                venture studio dedicated to building innovative solutions that empower businesses and communities.
-              </p>
-              
-              <div className="space-y-3">
-                <p className="font-semibold text-foreground">Our Portfolio:</p>
-                
-                <div>
-                  <a href="https://kommunity.app" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
-                    kommunity.app
-                  </a>
-                  <p className="text-muted-foreground mt-1">
-                    A B2B events marketplace connecting businesses with curated Philadelphia events and networking opportunities.
-                  </p>
-                </div>
-                
-                <div>
-                  <a href="https://cashflowai.biz" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
-                    cashflowai.biz
-                  </a>
-                  <p className="text-muted-foreground mt-1">
-                    Philadelphia-focused bookkeeping software that simplifies financial management for local businesses.
-                  </p>
-                </div>
-                
-                <div>
-                  <a href="https://referredai.org" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-semibold">
-                    referredai.org
-                  </a>
-                  <p className="text-muted-foreground mt-1">
-                    AI-powered referral and financial forms application streamlining paperwork and client onboarding.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-muted-foreground mt-4">
-                As a Philadelphia venture studio, we're committed to creating technology that serves our local 
-                community while pushing the boundaries of innovation.
-              </p>
-            </CardContent>
-          </Card>
 
           {/* CTA */}
           <Card className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-accent/10 border-primary/20">
