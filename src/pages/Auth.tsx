@@ -52,6 +52,10 @@ export default function Auth() {
       toast.error(error.message);
     } else {
       toast.success("Account created! You can now sign in.");
+      // Track conversion event
+      if (typeof window !== 'undefined' && 'gtag' in window) {
+        (window as any).gtag('event', 'conversion', {'send_to': 'AW-11564693893/0VlRCJnZgaAaEIXzvIor'});
+      }
     }
     setLoading(false);
   };
