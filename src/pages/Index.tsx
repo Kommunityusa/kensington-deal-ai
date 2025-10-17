@@ -24,6 +24,11 @@ const Index = () => {
     fetchNewsArticles();
     fetchProperties();
     fetchPropertyImages();
+    
+    // Track page view conversion
+    if (typeof window !== 'undefined' && 'gtag' in window) {
+      (window as any).gtag('event', 'conversion', {'send_to': 'AW-11564693893/qtApCLOq1osaEIXzvIor'});
+    }
   }, []);
 
   const fetchPropertyImages = async () => {
